@@ -1,0 +1,142 @@
+_id: 60f1629d29eb79002d085787
+name: Dashboards
+description: Dashboards function
+language: javascript
+timeout: 118
+triggers:
+  matchChart:
+    options:
+      method: Get
+      path: /matchChart
+      preflight: true
+    type: http
+    active: true
+  totalMatchChart:
+    options:
+      method: Get
+      path: /totalMatchChart
+      preflight: true
+    type: http
+    active: true
+  dashboardPastMatches:
+    options:
+      method: Get
+      path: /dashboardPastMatches
+      preflight: true
+    type: http
+    active: true
+  dashboardUserRewards:
+    options:
+      method: Get
+      path: /dashboardUserRewards
+      preflight: true
+    type: http
+    active: true
+  dashboardDuelAnswers:
+    options:
+      method: Get
+      path: /dashboardDuelAnswers
+      preflight: true
+    type: http
+    active: true
+  userDashboardCharges:
+    options:
+      method: Get
+      path: /userDashboardCharges
+      preflight: true
+    type: http
+    active: true
+  playedUsersCount:
+    options:
+      method: Get
+      path: /playedUsersCount
+      preflight: true
+    type: http
+    active: true
+  dashboardManuallyReward:
+    options:
+      method: Get
+      path: /dashboardManuallyReward
+      preflight: true
+    type: http
+    active: true
+  dashboardGetContacts:
+    options:
+      method: Get
+      path: /dashboardGetContacts
+      preflight: true
+    type: http
+    active: true
+  updateContact:
+    options:
+      method: Post
+      path: /updateContact
+      preflight: true
+    type: http
+    active: true
+  getManuallyRewardDashboard:
+    options:
+      method: Get
+      path: /getManuallyRewardDashboard
+      preflight: true
+    type: http
+    active: true
+  generateDashboardKey:
+    options:
+      timezone: Europe/Istanbul
+      frequency: "*/15 * * * *"
+    type: schedule
+    active: true
+  getDashboarKey:
+    options:
+      method: Get
+      path: /getDashboarKey
+      preflight: true
+    type: http
+    active: true
+  getLeaderUsersDashboard:
+    options:
+      method: Get
+      path: /getLeaderUsersDashboard
+      preflight: true
+    type: http
+    active: true
+  dahsboardBuggedRewards:
+    options:
+      method: Get
+      path: /dahsboardBuggedRewards
+      preflight: true
+    type: http
+    active: true
+  dashboardUserAnalysisReport:
+    options:
+      method: Get
+      path: /dashboardUserAnalysisReport
+      preflight: true
+    type: http
+    active: true
+  downloadUserAnalysisReport:
+    options:
+      method: Get
+      path: /downloadUserAnalysisReport
+      preflight: true
+    type: http
+    active: true
+  dahsboardUserPoints:
+    options:
+      method: Get
+      path: /dahsboardUserPoints
+      preflight: true
+    type: http
+    active: true
+env:
+  PAST_MATCHES_BUCKET_ID: "{PAST_MATCHES_BUCKET_ID}"
+  USER_BUCKET_ID: "{USER_BUCKET_ID}"
+  REWARD_LOGS_BUCKET_ID: "{REWARD_LOGS_BUCKET_ID}"
+  SECRET_API_KEY: "{SECRET_API_KEY}"
+  CHARGE_LOGS_BUCKET_ID: "{CHARGE_LOGS_BUCKET_ID}"
+  NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
+  CONTACT_BUCKET_ID: "{CONTACT_BUCKET_ID}"
+  CONFIGURATION_BUCKET_ID: "{CONFIGURATION_BUCKET_ID}"
+  BUGGED_REWARDS_BUCKET_ID: "{BUGGED_REWARDS_BUCKET_ID}"
+memoryLimit: 100

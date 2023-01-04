@@ -1,0 +1,57 @@
+_id: 60d9d2b438158a002c39266a
+name: Retry Reward
+description: Retry Reward  Function
+language: javascript
+timeout: 88
+triggers:
+  checkReward:
+    options:
+      timezone: Europe/Istanbul
+      frequency: "*/10 * * * *"
+    type: schedule
+    active: true
+  detectUniqueCharges:
+    options:
+      method: Get
+      path: /detectUniqueCharges
+      preflight: true
+    type: http
+    active: true
+  detectMissingAvailablePlay:
+    options:
+      timezone: Europe/Istanbul
+      frequency: 0 * * * *
+    type: schedule
+    active: true
+  detectErrorReward:
+    options:
+      method: Get
+      path: /detectErrorReward
+      preflight: true
+    type: http
+    active: false
+  detectMissingAvailablePlayTest:
+    options:
+      method: Get
+      path: /detectMissingAvailablePlayTest
+      preflight: true
+    type: http
+    active: true
+  manualSetReward1:
+    options:
+      method: Get
+      path: /manualSetReward1
+      preflight: true
+    type: http
+    active: true
+env:
+  PAST_MATCHES_BUCKET_ID: "{PAST_MATCHES_BUCKET_ID}"
+  REWARD_BUCKET_ID: "{REWARD_BUCKET_ID}"
+  USER_BUCKET_ID: "{USER_BUCKET_ID}"
+  MANUALLY_REWARD_BUCKET_ID: "{MANUALLY_REWARD_BUCKET_ID}"
+  SECRET_API_KEY: "{SECRET_API_KEY}"
+  CHARGE_BUCKET_ID: "{CHARGE_BUCKET_ID}"
+  PLAY_COUNT_LOGS_BUCKET_ID: "{PLAY_COUNT_LOGS_BUCKET_ID}"
+  BUGGED_REWARDS_BUCKET_ID: "{BUGGED_REWARDS_BUCKET_ID}"
+  NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
+memoryLimit: 100

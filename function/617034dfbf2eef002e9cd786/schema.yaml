@@ -1,0 +1,15 @@
+_id: 617034dfbf2eef002e9cd786
+name: Draw Functions
+language: javascript
+timeout: 61.7
+triggers:
+  sendChargeRequest:
+    options:
+      collection: bucket_60ab7235c03a2d002eb2f574
+      type: INSERT
+    type: database
+    active: true
+env:
+  NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
+  DRAW_LOGS_BUCKET: "{DRAW_LOGS_BUCKET}"
+memoryLimit: 100

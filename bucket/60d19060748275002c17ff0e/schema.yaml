@@ -1,0 +1,82 @@
+_id: 60d19060748275002c17ff0e
+title: Win-Lose Match Report
+description: Win-Lose Match Report
+icon: receipt
+primary: win_paid
+readOnly: false
+history: false
+properties:
+  date:
+    type: date
+    title: date
+    description: Description of the date input
+    options:
+      position: bottom
+    default: :created_at
+  win_paid:
+    type: number
+    title: win_paid
+    description: Description of the win_paid input
+    options:
+      position: bottom
+    default: 0
+  win_free:
+    type: number
+    title: win_free
+    description: Description of the win_free input
+    options:
+      position: bottom
+    default: 0
+  lose_paid:
+    type: number
+    title: lose_paid
+    description: Description of the lose_paid input
+    options:
+      position: bottom
+    default: 0
+  lose_free:
+    type: number
+    title: lose_free
+    description: Description of the lose_free input
+    options:
+      position: bottom
+    default: 0
+  win_total:
+    type: number
+    title: win_total
+    description: Description of the win_total input
+    options:
+      position: bottom
+    default: 0
+  equal_paid:
+    type: number
+    title: equal_paid
+    description: Description of the equal_paid input
+    options:
+      position: bottom
+    default: 0
+  equal_free:
+    type: number
+    title: equal_free
+    description: Description of the equal_free input
+    options:
+      position: bottom
+    default: 0
+  lose_total:
+    type: number
+    title: lose_total
+    description: Description of the lose_total input
+    options:
+      position: bottom
+    default: 0
+  report_type:
+    type: number
+    title: report_type
+    description: Description of the report_type input
+    options:
+      position: bottom
+    default: 0
+acl:
+  write: true==true
+  read: true==true
+order: 20

@@ -1,0 +1,43 @@
+_id: 60d9cb8b38158a002c39254d
+name: Fast Login & Register
+description: Login & Register with using fastlogin system of Turkcell
+language: javascript
+timeout: 62
+triggers:
+  login:
+    options:
+      method: Post
+      path: /fastLogin
+      preflight: true
+    type: http
+    active: true
+  register:
+    options:
+      method: Post
+      path: /fastRegister
+      preflight: true
+    type: http
+    active: true
+  changePassword:
+    options:
+      method: Get
+      path: /changePassword
+      preflight: true
+    type: http
+    active: true
+  getMyIp:
+    options:
+      method: Get
+      path: /getMyIp
+      preflight: true
+    type: http
+    active: true
+env:
+  FASTLOGIN_SECRET_KEY: "{FASTLOGIN_SECRET_KEY}"
+  FASTLOGIN_SERVICE_ID: "{FASTLOGIN_SERVICE_ID}"
+  SECRET_API_KEY: "{SECRET_API_KEY}"
+  USER_POLICY: "{USER_POLICY}"
+  USER_BUCKET_ID: "{USER_BUCKET_ID}"
+  PASSWORD_SALT: "{PASSWORD_SALT}"
+  NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
+memoryLimit: 100

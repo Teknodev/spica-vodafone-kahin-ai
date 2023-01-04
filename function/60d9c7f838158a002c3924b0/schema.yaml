@@ -1,0 +1,20 @@
+_id: 60d9c7f838158a002c3924b0
+name: Check Finished Duels
+description: This function gets every finished duel and left duels. Then close
+  the duel and log everything.
+language: javascript
+timeout: 56.5
+triggers:
+  checkFinishedDuels:
+    options:
+      timezone: Europe/Istanbul
+      frequency: "*/10 * * * * *"
+    type: schedule
+    active: true
+env:
+  SECRET_API_KEY: "{SECRET_API_KEY}"
+  NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
+  DUEL_BUCKET_ID: "{DUEL_BUCKET_ID}"
+  PAST_DUELS_BUCKET_ID: "{PAST_DUELS_BUCKET_ID}"
+  USER_BUCKET_ID: "{USER_BUCKET_ID}"
+memoryLimit: 100

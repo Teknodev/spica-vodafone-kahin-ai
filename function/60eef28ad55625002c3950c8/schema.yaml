@@ -1,0 +1,18 @@
+_id: 60eef28ad55625002c3950c8
+name: Get Current Date
+description: desdes
+language: javascript
+timeout: 60
+triggers:
+  getStartDate:
+    options:
+      method: Get
+      path: /getStartDate
+      preflight: true
+    type: http
+    active: true
+    batch:
+      deadline: 55
+      limit: 9007199254740991
+env: {}
+memoryLimit: 100

@@ -1,0 +1,31 @@
+_id: 60d9d0ed38158a002c392625
+name: Alert Function
+description: Alert Function
+language: javascript
+timeout: 62
+triggers:
+  duelHighLoads:
+    options:
+      collection: bucket_605ca275e9960e002c2781a4
+      type: INSERT
+    type: database
+    active: true
+  checkPastMatch:
+    options:
+      timezone: Europe/Istanbul
+      frequency: "* * * * *"
+    type: schedule
+    active: true
+  detectInterruptedGame:
+    options:
+      method: Get
+      path: /detectInterruptedGame
+      preflight: true
+    type: http
+    active: true
+env:
+  DUEL_BUCKET_ID: "{DUEL_BUCKET_ID}"
+  ALERT_BUCKET_ID: "{ALERT_BUCKET_ID}"
+  PAST_MATCHES_BUCKET_ID: "{PAST_MATCHES_BUCKET_ID}"
+  NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
+memoryLimit: 100

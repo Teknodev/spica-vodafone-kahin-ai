@@ -1,0 +1,48 @@
+_id: 611b8c1db157fd002d853f6c
+name: In Game
+language: javascript
+timeout: 60
+triggers:
+  playCountDecrease:
+    type: http
+    active: true
+    options:
+      method: Post
+      path: /playCountDecrease
+      preflight: true
+  setReady:
+    options:
+      method: Post
+      path: /setReady
+      preflight: true
+    type: http
+    active: true
+  changeAvatar:
+    options:
+      method: Post
+      path: /changeAvatar
+      preflight: true
+    type: http
+    active: true
+  addNewBots:
+    options:
+      method: Post
+      path: /addNewBots
+      preflight: true
+    type: http
+    active: true
+  changeName:
+    options:
+      method: Post
+      path: /changeName
+      preflight: true
+    type: http
+    active: true
+env:
+  JWT_SECRET_KEY: "{JWT_SECRET_KEY}"
+  USER_BUCKET_ID: "{USER_BUCKET_ID}"
+  DUEL_BUCKET_ID: "{DUEL_BUCKET_ID}"
+  NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
+  SECRET_API_KEY: "{SECRET_API_KEY}"
+  DRAW_PARTICIPANTS: "{DRAW_PARTICIPANTS}"
+memoryLimit: 100

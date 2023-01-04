@@ -1,0 +1,85 @@
+_id: 608bb7901c4a8c002cba4092
+title: Match Report
+description: Describe your new bucket
+icon: receipt
+primary: p2p_play
+readOnly: false
+history: false
+properties:
+  date:
+    type: date
+    title: date
+    description: Description of the date input
+    options:
+      position: bottom
+    default: :created_at
+  p2p_play:
+    type: number
+    title: p2p_play
+    description: Description of the p2p_play input
+    options:
+      position: bottom
+  p2p_play_points_earned:
+    type: number
+    title: p2p_play_points_earned
+    description: Description of the p2p_play_points_earned input
+    options:
+      position: bottom
+  p2m_play:
+    type: number
+    title: p2m_play
+    description: Description of the p2m_play input
+    options:
+      position: bottom
+  p2m_play_points_earned:
+    type: number
+    title: p2m_play_points_earned
+    description: Description of the p2m_play_points_earned input
+    options:
+      position: bottom
+  daily_reward_true:
+    type: number
+    title: daily_reward_true
+    description: Description of the daily_reward_true input
+    options:
+      position: bottom
+    default: 0
+  daily_reward_false:
+    type: number
+    title: daily_reward_false
+    description: Description of the daily_reward_false input
+    options:
+      position: bottom
+    default: 0
+  report_type:
+    type: number
+    title: report_type
+    description: Description of the report_type input
+    options:
+      position: bottom
+    default: 0
+  daily_reward_earned:
+    type: number
+    title: daily_reward_earned
+    description: Description of the daily_reward_earned input
+    options:
+      position: bottom
+    default: 0
+  daily_match_reward:
+    type: number
+    title: daily_match_reward
+    description: Description of the daily_match_reward input
+    options:
+      position: bottom
+    default: 0
+  daily_charge_reward:
+    type: number
+    title: daily_charge_reward
+    description: Description of the daily_charge_reward input
+    options:
+      position: bottom
+    default: 0
+acl:
+  write: true==true
+  read: true==true
+order: 16

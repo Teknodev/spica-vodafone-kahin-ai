@@ -1,0 +1,54 @@
+_id: 60d0b05b748275002c17fb50
+title: User-Match Report
+description: Describe your new bucket
+icon: receipt
+primary: paid_player
+readOnly: false
+history: false
+properties:
+  date:
+    type: date
+    title: date
+    description: Description of the date input
+    options:
+      position: bottom
+    default: :created_at
+  paid_player:
+    type: number
+    title: paid_player
+    description: Description of the paid_player input
+    options:
+      position: bottom
+    default: 0
+  free_player:
+    type: number
+    title: free_player
+    description: Description of the free_player input
+    options:
+      position: bottom
+    default: 0
+  paid_play_total:
+    type: number
+    title: paid_play_total
+    description: Description of the paid_play_total input
+    options:
+      position: bottom
+    default: 0
+  free_play_total:
+    type: number
+    title: free_play_total
+    description: Description of the free_play_total input
+    options:
+      position: bottom
+    default: 0
+  report_type:
+    type: number
+    title: report_type
+    description: Description of the report_type input
+    options:
+      position: bottom
+    default: 0
+acl:
+  write: true==true
+  read: true==true
+order: 19

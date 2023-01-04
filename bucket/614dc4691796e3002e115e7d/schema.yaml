@@ -1,0 +1,48 @@
+_id: 614dc4691796e3002e115e7d
+title: Play Count Logs
+description: Describe your new bucket
+icon: view_stream
+primary: title
+readOnly: false
+history: false
+properties:
+  title:
+    type: string
+    title: title
+    description: Title of the row
+    options:
+      position: left
+  added_play_count:
+    type: array
+    title: added_play_count
+    description: Description of the added_play_count input
+    options:
+      position: bottom
+    items:
+      title: Title of the items
+      type: object
+      properties:
+        missing_play_count:
+          type: number
+          title: missing_play_count
+          description: Description of the missing_play_count input
+          options:
+            position: bottom
+          default: 0
+        msisdn:
+          type: string
+          title: msisdn
+          description: Description of the msisdn input
+          options:
+            position: bottom
+  created_at:
+    type: date
+    title: created_at
+    description: Description of the created_at input
+    options:
+      position: bottom
+    default: :created_at
+acl:
+  write: true==true
+  read: true==true
+order: 24

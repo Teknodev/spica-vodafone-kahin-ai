@@ -1,0 +1,12 @@
+attributes:
+  properties:
+    msisdn:
+      type: string
+      title: msisdn
+      description: Description of 'Msisdn'
+      options: {}
+    role:
+      type: string
+      title: role
+      description: Description of 'role'
+      options: {}

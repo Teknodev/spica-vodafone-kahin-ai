@@ -1,0 +1,15 @@
+_id: 633bf949956545002c9b7e31
+name: Helper
+language: javascript
+timeout: 55
+triggers:
+  replaceAbusiveName:
+    type: schedule
+    active: true
+    options:
+      timezone: UTC
+      frequency: 0 * * * *
+env:
+  NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
+  USER_BUCKET: "{USER_BUCKET}"
+memoryLimit: 100

@@ -1,0 +1,23 @@
+_id: 60d9ca5538158a002c392519
+name: Add to Match Making
+description: Adding user to matchmaking bucket
+language: javascript
+timeout: 57
+triggers:
+  addMatchMaking:
+    options:
+      method: Post
+      path: /addMatchMaking
+      preflight: true
+    type: http
+    active: true
+    batch:
+      deadline: 50
+      limit: 9007199254740991
+env:
+  MATCHMAKING_BUCKET_ID: "{MATCHMAKING_BUCKET_ID}"
+  SECRET_API_KEY: "{SECRET_API_KEY}"
+  JWT_SECRET_KEY: "{JWT_SECRET_KEY}"
+  USER_BUCKET_ID: "{USER_BUCKET_ID}"
+  NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
+memoryLimit: 100

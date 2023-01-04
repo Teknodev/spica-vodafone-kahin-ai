@@ -1,0 +1,63 @@
+_id: 60c39ef7ab3dbe002dfefa02
+title: Charge Report
+description: Charge report
+icon: receipt
+primary: charge_amount
+readOnly: false
+history: false
+properties:
+  date:
+    type: date
+    title: date
+    description: Description of the date input
+    options:
+      position: bottom
+    default: :created_at
+  charge_amount:
+    type: string
+    title: charge_amount
+    description: Description of the charge_amount input
+    options:
+      position: bottom
+  quantity:
+    type: number
+    title: quantity
+    description: Description of the quantity input
+    options:
+      position: bottom
+    default: 0
+  play_count:
+    type: string
+    title: play_count
+    description: Description of the play_count input
+    options:
+      position: bottom
+  status:
+    type: string
+    title: status
+    description: Description of the status input
+    options:
+      position: bottom
+  error:
+    type: string
+    title: error
+    description: Description of the error input
+    options:
+      position: bottom
+  report_type:
+    type: number
+    title: report_type
+    description: Description of the report_type input
+    options:
+      position: bottom
+    default: 0
+  ratio:
+    type: number
+    title: ratio
+    description: Description of the ratio input
+    options:
+      position: bottom
+acl:
+  write: true==true
+  read: true==true
+order: 18

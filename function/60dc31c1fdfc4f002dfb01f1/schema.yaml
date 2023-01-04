@@ -1,0 +1,18 @@
+_id: 60dc31c1fdfc4f002dfb01f1
+name: Create Question
+description: question creation algorithm
+language: javascript
+timeout: 630
+triggers:
+  default:
+    options:
+      method: Get
+      path: /testestest
+      preflight: true
+    type: http
+    active: true
+    batch:
+      deadline: 30
+      limit: 9007199254740991
+env: {}
+memoryLimit: 100

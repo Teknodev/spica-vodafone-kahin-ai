@@ -1,0 +1,15 @@
+_id: 60f16c7029eb79002d0857df
+name: Import Excel
+description: Import data as xls format
+language: javascript
+timeout: 598
+triggers:
+  excelImport:
+    active: true
+    type: bucket
+    options:
+      type: INSERT
+      bucket: 60f16c6f29eb79002d0857dc
+env:
+  AUTH_APIKEY: "{AUTH_APIKEY}"
+memoryLimit: 100

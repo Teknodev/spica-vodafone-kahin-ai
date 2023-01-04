@@ -1,0 +1,51 @@
+_id: 606c138f6b2647002c2fc497
+title: Matchmaking
+description: Matchmaking Ultra new desc
+icon: record_voice_over
+primary: min_elo
+readOnly: false
+history: false
+properties:
+  user:
+    type: relation
+    title: user
+    description: Description of the user input
+    options:
+      position: bottom
+    relationType: onetoone
+    bucketId: 605c9480e9960e002c278191
+    dependent: false
+    primary: name
+  date:
+    type: date
+    title: date
+    description: Description of the date input
+    options:
+      position: bottom
+    default: :created_at
+  min_elo:
+    type: number
+    title: min_elo
+    description: Description of the min_elo input
+    options:
+      position: bottom
+  max_elo:
+    type: number
+    title: max_elo
+    description: Description of the max_elo input
+    options:
+      position: bottom
+acl:
+  write: |-
+    auth._id == document.user.identity ||
+    auth.attributes.role == "admin" ||
+    auth._id == "60f170fa29eb79002d0857e4" || 
+    auth.key == "e5wl18kmw287kr"
+  read: |-
+    auth._id == document.user.identity ||
+    auth.attributes.role == "admin" ||
+    auth._id == "60f170fa29eb79002d0857e4" || 
+    auth.key == "e5wl18kmw287kr"
+required:
+  - user
+order: 7
