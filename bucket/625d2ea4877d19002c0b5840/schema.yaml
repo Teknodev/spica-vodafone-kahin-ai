@@ -1,7 +1,7 @@
 _id: 625d2ea4877d19002c0b5840
 title: Draw Logs
 description: Describe your new bucket
-icon: view_stream
+icon: line_style
 primary: msisdn
 readOnly: false
 history: false
@@ -33,4 +33,5 @@ properties:
 acl:
   write: true==true
   read: true==true
-order: 27
+order: 21
+category: Logs

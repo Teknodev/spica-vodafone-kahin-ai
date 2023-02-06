@@ -12,9 +12,7 @@ triggers:
     type: schedule
     active: true
 env:
-  SECRET_API_KEY: "{SECRET_API_KEY}"
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
-  DUEL_BUCKET_ID: "{DUEL_BUCKET_ID}"
-  PAST_DUELS_BUCKET_ID: "{PAST_DUELS_BUCKET_ID}"
-  USER_BUCKET_ID: "{USER_BUCKET_ID}"
 memoryLimit: 100
+order: 13
+category: D_1

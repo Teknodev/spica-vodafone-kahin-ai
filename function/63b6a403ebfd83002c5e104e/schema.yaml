@@ -1,0 +1,15 @@
+_id: 63b6a403ebfd83002c5e104e
+name: User
+language: javascript
+timeout: 90
+triggers:
+  default:
+    type: http
+    active: true
+    options:
+      method: Get
+      path: /
+      preflight: true
+env: {}
+memoryLimit: 100
+order: 19

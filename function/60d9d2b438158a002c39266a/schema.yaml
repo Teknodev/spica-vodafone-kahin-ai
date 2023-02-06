@@ -9,20 +9,20 @@ triggers:
       timezone: Europe/Istanbul
       frequency: "*/10 * * * *"
     type: schedule
-    active: true
+    active: false
   detectUniqueCharges:
     options:
       method: Get
       path: /detectUniqueCharges
       preflight: true
     type: http
-    active: true
+    active: false
   detectMissingAvailablePlay:
     options:
       timezone: Europe/Istanbul
       frequency: 0 * * * *
     type: schedule
-    active: true
+    active: false
   detectErrorReward:
     options:
       method: Get
@@ -36,22 +36,9 @@ triggers:
       path: /detectMissingAvailablePlayTest
       preflight: true
     type: http
-    active: true
-  manualSetReward1:
-    options:
-      method: Get
-      path: /manualSetReward1
-      preflight: true
-    type: http
-    active: true
+    active: false
 env:
-  PAST_MATCHES_BUCKET_ID: "{PAST_MATCHES_BUCKET_ID}"
-  REWARD_BUCKET_ID: "{REWARD_BUCKET_ID}"
-  USER_BUCKET_ID: "{USER_BUCKET_ID}"
-  MANUALLY_REWARD_BUCKET_ID: "{MANUALLY_REWARD_BUCKET_ID}"
-  SECRET_API_KEY: "{SECRET_API_KEY}"
-  CHARGE_BUCKET_ID: "{CHARGE_BUCKET_ID}"
-  PLAY_COUNT_LOGS_BUCKET_ID: "{PLAY_COUNT_LOGS_BUCKET_ID}"
-  BUGGED_REWARDS_BUCKET_ID: "{BUGGED_REWARDS_BUCKET_ID}"
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
+order: 14
+category: D_1

@@ -2,7 +2,7 @@ _id: 605ca275e9960e002c2781a4
 title: Duel
 description: The duel between the users
 icon: offline_bolt
-primary: duel_type
+primary: player_type
 readOnly: false
 history: false
 properties:
@@ -124,13 +124,12 @@ properties:
     options:
       position: bottom
     default: :created_at
-  duel_type:
+  player_type:
     type: number
-    title: duel_type
-    description: Description of the duel_type input
+    title: player_type
+    description: Description of the player_type input
     options:
       position: bottom
-    default: 0
   winner:
     type: number
     title: winner
@@ -157,4 +156,5 @@ acl:
 required:
   - user1
   - user2
-order: 8
+order: 6
+category: Match

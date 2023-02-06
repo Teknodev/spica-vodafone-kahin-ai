@@ -37,4 +37,5 @@ properties:
     title: content
 primary: content
 icon: outbond
-order: 3
+order: 1
+category: DevOps

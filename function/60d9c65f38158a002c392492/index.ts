@@ -1,9 +1,8 @@
-import * as Bucket from "@spica-devkit/bucket";
-import * as Identity from "@spica-devkit/identity";
+import * as Api from "../../63b57559ebfd83002c5defe5/.build";
+import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
 
-const SECRET_API_KEY = process.env.SECRET_API_KEY;
-const USER_POLICY = process.env.USER_POLICY;
-const USER_BUCKET_ID = process.env.USER_BUCKET_ID;
+const USER_POLICY = Environment.env.USER_POLICY;
+const USER_BUCKET = Environment.env.BUCKET.USER;
 
 export async function register(req, res) {
     console.log("@observer::register");
@@ -49,7 +48,7 @@ export async function login(req, res) {
 }
 
 async function getIdentityToken(mobile_number, password) {
-    Identity.initialize({ apikey: `${SECRET_API_KEY}` });
+    const Identity = Api.useIdentity();
 
     return new Promise(async (resolve, reject) => {
         await Identity.login(mobile_number, password)
@@ -65,9 +64,10 @@ async function getIdentityToken(mobile_number, password) {
 
 // -identity operation
 async function createIdentity(mobile_number, password) {
+    const Identity = Api.useIdentity();
+
     let msisdn = msisdnGenerate(10);
     // msisdn = '5354513344';
-    Identity.initialize({ apikey: `${SECRET_API_KEY}` });
 
     return new Promise(async (resolve, reject) => {
         await Identity.insert({
@@ -98,11 +98,11 @@ function msisdnGenerate(length) {
 }
 
 async function addToUserBucket(identity_id, name, avatar_id) {
-    Bucket.initialize({ apikey: `${SECRET_API_KEY}` });
+    const Bucket = Api.useBucket();
 
     return new Promise(async (resolve, reject) => {
         await Bucket.data
-            .insert(`${USER_BUCKET_ID}`, {
+            .insert(`${USER_BUCKET}`, {
                 identity: identity_id,
                 name: name,
                 avatar_id: avatar_id,
@@ -126,4 +126,11 @@ async function addToUserBucket(identity_id, name, avatar_id) {
 function createPassword(text) {
     let password = "a-" + text + "-a";
     return password;
+}
+
+export async function testTest123(req, res){
+    let tets = "60d9c65f38158a002c392492"
+    console.log(typeof tets)
+    console.log(typeof Api.toObjectId(tets))
+    return res.status(200).send({messgae: 'ok' })
 }

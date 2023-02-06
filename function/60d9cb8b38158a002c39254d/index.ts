@@ -1,47 +1,18 @@
-import { database, ObjectId } from "@spica-devkit/database";
-import * as Identity from "@spica-devkit/identity";
+import * as Api from "../../63b57559ebfd83002c5defe5/.build";
+import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
+
 let jwt = require("jsonwebtoken");
 const fetch = require("node-fetch");
 
-const FASTLOGIN_SECRET_KEY = process.env.FASTLOGIN_SECRET_KEY;
-const FASTLOGIN_SERVICE_ID = process.env.FASTLOGIN_SERVICE_ID;
-const SECRET_API_KEY = process.env.SECRET_API_KEY;
-const USER_POLICY = process.env.USER_POLICY;
-const PASSWORD_SALT = process.env.PASSWORD_SALT;
-
-const USER_BUCKET_ID = process.env.USER_BUCKET_ID;
-/*
-const MOCK_RES = {
-    resultStatus: {
-        resultCode: 0,
-        resultName: "SUCCESS",
-        resultMessage: "İşlem başarılıdır.",
-        flowType: "NONE",
-        detailResult: "N/A"
-    },
-    msisdn: "5322101428",
-    email: "murat.malci@turkcell.com.tr",
-    accountId: "d8d91e66-47dd-418d-82be-186f8b07abda",
-    loginType: "MC_LOGIN",
-    countryIsoCode: "TR",
-    regionCode: "+90",
-    mobileConnectUserInfo: {
-        sub: "ac90567b-add9-4012-ba24-0d2b551ec0a0",
-        updated_at: "1619274404720",
-        email: "murat.malci@turkcell.com.tr",
-        email_verified: true,
-        phone_number: "5322101428",
-        phone_number_verified: true
-    }
-};*/
-
-let db;
-
-// login
+const USER_POLICY = Environment.env.USER_POLICY;
+const USER_BUCKET = Environment.env.BUCKET.USER;
+const PASSWORD_SALT = Environment.env.FASTLOGIN.PASSWORD_SALT;
+const FASTLOGIN_SECRET_KEY = Environment.env.FASTLOGIN.SECRET_KEY;
+const FASTLOGIN_SERVICE_ID = Environment.env.FASTLOGIN.SERVICE_ID;
 
 export async function login(req, res) {
-    if (!db) db = await database().catch(err => console.log("ERROR 1", err));
-    const users_collection = db.collection(`bucket_${USER_BUCKET_ID}`);
+    const db = await Api.useDatabase();
+    const users_collection = db.collection(`bucket_${USER_BUCKET}`);
 
     const { token } = req.body;
 
@@ -93,7 +64,7 @@ export async function login(req, res) {
                         const user = await users_collection
                             .findOne({ identity: String(user_identity._id) })
                             .catch(err => console.log("ERROR 2", err));
-                            
+
                         getIdentityToken(identifier, password).then(async data => {
                             return res.status(200).send({
                                 token: data.token,
@@ -160,13 +131,10 @@ export async function login(req, res) {
 // register
 
 export async function register(req, res) {
-    if (!db) db = await database().catch(err => console.log("ERROR 3", err));
+    const db = await Api.useDatabase();
     const { identity, name, avatar_id } = req.body;
-    // Bucket.initialize({ apikey: `${SECRET_API_KEY}` });
 
-    // 1-check token && name && url is defined
-
-    const users_collection = db.collection(`bucket_${USER_BUCKET_ID}`);
+    const users_collection = db.collection(`bucket_${USER_BUCKET}`);
     if (name) {
         let user = await users_collection
             .findOne({ identity: identity })
@@ -175,7 +143,7 @@ export async function register(req, res) {
         if (user) {
             let userData = await users_collection
                 .findOneAndUpdate(
-                    { _id: ObjectId(user._id) },
+                    { _id: Api.toObjectId(user._id) },
                     {
                         $set: {
                             name: name,
@@ -213,8 +181,7 @@ async function fastLogin(token) {
 
 // get identity token(login to spica) with identifier and password
 function getIdentityToken(identifier, password) {
-    Identity.initialize({ apikey: `${SECRET_API_KEY}` });
-
+    const Identity = Api.useIdentity();
     return new Promise(async (resolve, reject) => {
         await Identity.login(identifier, password)
             .then(data => {
@@ -230,8 +197,7 @@ function getIdentityToken(identifier, password) {
 
 // create identity(register to spica) with identifier and password
 function createIdentity(identifier, password, msisdn) {
-    Identity.initialize({ apikey: `${SECRET_API_KEY}` });
-
+    const Identity = Api.useIdentity();
     return new Promise(async (resolve, reject) => {
         await Identity.insert({
             identifier: identifier,
@@ -251,64 +217,23 @@ function createIdentity(identifier, password, msisdn) {
 
 // helper functions
 function isResponseValid(response) {
-    /* 
-    --success message
-    {
-        "resultStatus": {
-            "resultCode": 0,
-            "resultName": "SUCCESS",
-            "resultMessage": "İşlem başarılıdır.",
-            "flowType": "NONE",
-            "detailResult": "N/A"
-        },
-        "msisdn": "5324771739",
-        "email": "emre2345@yahoo.com",
-        "accountId": "e7d5078a-ae62-4cbf-aab6-78f60dbc2eb8",
-        "loginType": "EMAIL_LOGIN",
-        "countryIsoCode": "TR",
-        "regionCode": "+90",
-        "mobileConnectUserInfo": null
-    }
-
-    --invalid token
-    {
-        "resultStatus": {
-            "resultCode": 4,
-            "resultName": "INVALID_AUTH_TOKEN",
-            "resultMessage": "Geçersiz token",
-            "flowType": "NONE",
-            "detailResult": "N/A"
-        },
-        "msisdn": null,
-        "email": null,
-        "accountId": null,
-        "loginType": null,
-        "countryIsoCode": null,
-        "regionCode": null,
-        "mobileConnectUserInfo": null
-    }
-    */
-
     let is_valid = false;
     if (response.msisdn != null && response.accountId != null) {
         is_valid = true;
     }
     return is_valid;
-    // return true;
 }
 
 function getIdentifier(response) {
     let identifier = response.accountId;
 
     return identifier;
-    // return "abcde";
 }
 
 function getPassword(response) {
     let unique_password = PASSWORD_SALT;
 
     return unique_password;
-    // return "abcde";
 }
 
 export async function getMyIp(req, res) {

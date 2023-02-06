@@ -1,0 +1,56 @@
+export const env = {
+    USER_POLICY: "606328bfe9960e002c2781c7",
+    BUCKET: {
+        USER: "605c9480e9960e002c278191",
+        DUEL: "605ca275e9960e002c2781a4",
+        ALERT: "60b616c103f687002c65cf9a",
+        PAST_MATCH: "60742ed3f95e39002c4917ae",
+        MATCHMAKING: "606c138f6b2647002c2fc497",
+        BOT: "61517461d0398a002e618021",
+        CONFIRMATION_CODE: "608a697abce757002c808288",
+        MANUALLY_REWARD: "60aa13679835cd002c1c9a1a",
+        CHARGE: "60ab7235c03a2d002eb2f574",
+        PLAY_COUNT_LOG: "614dc4691796e3002e115e7d",
+        BUGGED_REWARD: "616e782f9c4660002dd09ab1",
+        DRAW_LOG: "625d2ea4877d19002c0b5840",
+        MATCH_REPORT: "608bb7901c4a8c002cba4092",
+        CHARGE_REPORT: "60c39ef7ab3dbe002dfefa02",
+        USER_REPORT: "608ac3061c4a8c002cba02a5",
+        USER_MATCH_REPORT: "60d0b05b748275002c17fb50",
+        WIN_LOSE_MATCH: "60d19060748275002c17ff0e",
+        ANSWER_TO_QUESTION_REPORT: "60d19214748275002c17ff18",
+        RETRY_REPORT: "614dc4c71796e3002e1161ea",
+        REWARD_REPORT: "615191c237f1b4002ddcc260",
+        REWARD: "609669f805b0df002ceb2517",
+        REWARD_LOG: "609669f805b0df002ceb2517",
+        CHARGE_LOG: "60ab7235c03a2d002eb2f574",
+        MAILER: "60bf26f4c48b36002dd87e01",
+        CONTACT: "607808eba04c51002d25a007",
+        CONFIGURATION: "6067935ee9960e002c27877f",
+        
+    },
+    FASTLOGIN: {
+        SECRET_KEY: "b79bbfdd-456e-4092-9cde-966db74dbae9",
+        SERVICE_ID: "101180",
+        PASSWORD_SALT: "a062b81f3ba54ba43babaacc5b267654"
+    },
+    MAILER: {
+        SMTP_USER: "noreply@spicaengine.com",
+        SMTP_HOST: "smtp.yandex.com",
+        SMTP_PASSWORD: "Dream_Har14",
+        MAIL_FROM: "noreply@spicaengine.com"
+    },
+    TCELL: {
+        USERNAME: 400026758,
+        PASSWORD: 400026758,
+        MT_VARIANT: 130524,
+        CHARGE_VARIANT: 132985,
+        CHARGE_OFFER_ID: 457412,
+        HOURLY_1GB_OFFER_ID: 455883,
+        DAILY_2GB_OFFER_ID: 455884,
+        HOURLY_CAMPAIGN_ID: 1236,
+        DAILY_1GB_OFFER_ID: 451318,
+        DAILY_CAMPAIGN_ID: "871137.947567.966243",
+        CHARGE_AMOUNT: "7 TL"
+    }
+}

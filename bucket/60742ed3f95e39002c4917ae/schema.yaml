@@ -86,13 +86,12 @@ properties:
     options:
       position: bottom
       index: true
-  duel_type:
+  player_type:
     type: number
-    title: duel_type
-    description: Description of the duel_type input
+    title: player_type
+    description: Description of the player_type input
     options:
       position: bottom
-      index: true
   points_earned:
     type: number
     title: points_earned
@@ -126,4 +125,5 @@ properties:
 acl:
   write: true==true
   read: true==true
-order: 9
+order: 7
+category: Match

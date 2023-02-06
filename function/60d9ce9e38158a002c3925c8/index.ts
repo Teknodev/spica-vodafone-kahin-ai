@@ -1,28 +1,25 @@
-import { database, ObjectId } from "@spica-devkit/database";
-import * as Bucket from "@spica-devkit/bucket";
+import * as Api from "../../63b57559ebfd83002c5defe5/.build";
+import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
 
-const SECRET_API_KEY = process.env.SECRET_API_KEY;
-const PAST_MATCHES_BUCKET_ID = process.env.PAST_MATCHES_BUCKET_ID;
-const REWARD_LOGS_BUCKET_ID = process.env.REWARD_LOGS_BUCKET_ID;
-const CHARGE_LOGS_BUCKET_ID = process.env.CHARGE_LOGS_BUCKET_ID;
-const MAILER_BUCKET_ID = process.env.MAILER_BUCKET_ID;
-const MATCH_REPORT_BUCKET_ID = process.env.MATCH_REPORT_BUCKET_ID;
-const USER_BUCKET_ID = process.env.USER_BUCKET_ID;
-const USER_REPORT_BUCKET_ID = process.env.USER_REPORT_BUCKET_ID;
-const CHARGE_REPORT_BUCKET_ID = process.env.CHARGE_REPORT_BUCKET_ID;
-const USERS_MATCH_REPORT_BUCKET_ID = process.env.USERS_MATCH_REPORT_BUCKET_ID;
-const WIN_LOSE_MATCHES_BUCKET_ID = process.env.WIN_LOSE_MATCHES_BUCKET_ID;
-const ANSWERS_TO_QUESTION_REPORT_BUCKET_ID = process.env.ANSWERS_TO_QUESTION_REPORT_BUCKET_ID;
-const PLAY_COUNT_LOGS_BUCKET_ID = process.env.PLAY_COUNT_LOGS_BUCKET_ID;
-const MANUALLY_REWARD_BUCKET_ID = process.env.MANUALLY_REWARD_BUCKET_ID;
-const RETRY_REPORT_BUCKET_ID = process.env.RETRY_REPORT_BUCKET_ID;
-const REWARD_REPORT_BUCKET_ID = process.env.REWARD_REPORT_BUCKET_ID;
-const BUGGED_REWARD_BUCKET_ID = process.env.BUGGED_REWARD_BUCKET_ID;
+const PAST_MATCH_BUCKET = Environment.env.BUCKET.PAST_MATCH;
+const REWARD_LOG_BUCKET = Environment.env.BUCKET.REWARD_LOG;
+const CHARGE_LOG_BUCKET = Environment.env.BUCKET.CHARGE_LOG;
+const MAILER_BUCKET = Environment.env.BUCKET.MAILER;
+const MATCH_REPORT_BUCKET = Environment.env.BUCKET.MATCH_REPORT;
+const USER_BUCKET = Environment.env.BUCKET.USER;
+const USER_REPORT_BUCKET = Environment.env.BUCKET.USER_REPORT;
+const CHARGE_REPORT_BUCKET = Environment.env.BUCKET.CHARGE_REPORT;
+const USER_MATCH_REPORT_BUCKET = Environment.env.BUCKET.USER_MATCH_REPORT;
+const WIN_LOSE_MATCH_BUCKET_ID = Environment.env.BUCKET.WIN_LOSE_MATCH;
+const ANSWER_TO_QUESTION_REPORT_BUCKET = Environment.env.BUCKET.ANSWER_TO_QUESTION_REPORT;
+const PLAY_COUNT_LOG_BUCKET = Environment.env.BUCKET.PLAY_COUNT_LOG;
+const MANUALLY_REWARD_BUCKET = Environment.env.BUCKET.MANUALLY_REWARD;
+const RETRY_REPORT_BUCKET = Environment.env.BUCKET.RETRY_REPORT;
+const REWARD_REPORT_BUCKET = Environment.env.BUCKET.REWARD_REPORT;
+const BUGGED_REWARD_BUCKET = Environment.env.BUCKET.BUGGED_REWARD;
 
-const DAILY_2GB_OFFER_ID = 455884;
-const HOURLY_1GB_OFFER_ID = 455883;
-const DAILY_1GB_OFFER_ID = 451318;
-const CHARGE_AMOUNT = "7 TL";
+const DAILY_1GB_OFFER_ID = Environment.env.TCELL.DAILY_1GB_OFFER_ID;
+const CHARGE_AMOUNT = Environment.env.TCELL.CHARGE_AMOUNT;
 
 export async function executeReportDaily() {
     let date = new Date().setDate(new Date().getDate() - 1)
@@ -42,6 +39,7 @@ export async function executeReportDaily() {
 
     return true;
 }
+
 export async function executeReportWeekly() {
     await reportExportSend("Haftalık Toplam Rapor", 1).catch(err => console.log("ERROR: 63", err));
     await reportExportSend("Haftalık Gün Bazlı Rapor", 11).catch(err =>
@@ -50,6 +48,7 @@ export async function executeReportWeekly() {
 
     return true;
 }
+
 export async function executeReportMonthly() {
     await reportExportSend("Aylık Gün Bazlı Rapor", 22).catch(err =>
         console.log("ERROR: 163", err)
@@ -64,15 +63,9 @@ export async function executeReportMonthly() {
 export async function questionReport(reportType, dateFrom, dateTo) {
     dateFrom = new Date(dateFrom);
     dateTo = new Date(dateTo);
-    let reportDate = new Date().setDate(new Date().getDate() - 1)
 
-    const db = await database().catch(err => console.log("ERROR: 16", err));
-    const pastMatchesCollection = db.collection(`bucket_${PAST_MATCHES_BUCKET_ID}`);
-    const answersToQuestionsCollection = db.collection(
-        `bucket_${ANSWERS_TO_QUESTION_REPORT_BUCKET_ID}`
-    );
-
-    let answersArr = {
+    const reportDate = new Date().setDate(new Date().getDate() - 1)
+    const answersArr = {
         l1_correct: 0,
         l2_correct: 0,
         l3_correct: 0,
@@ -81,41 +74,38 @@ export async function questionReport(reportType, dateFrom, dateTo) {
         l3_wrong: 0
     };
 
-    const pastDuels = await pastMatchesCollection
-        .find({ end_time: { $gte: dateFrom, $lt: dateTo } })
-        .toArray()
-        .catch(err => console.log("ERROR: 18", err));
+    const pastDuels = await Api.getMany(PAST_MATCH_BUCKET, {
+        end_time: { $gte: dateFrom, $lt: dateTo }
+    })
 
-    if (pastDuels[0]) {
-        pastDuels.forEach(duel => {
-            for (let user of [1, 2]) {
-                if (duel[`user${user}_answers`]) {
-                    duel[`user${user}_answers`].forEach(questionItem => {
-                        let question = JSON.parse(questionItem);
-
-                        if (question.user_answer_is_right) {
-                            answersArr[`l${question.level}_correct`] += 1;
-                        } else answersArr[`l${question.level}_wrong`] += 1;
-                    });
-                }
-            }
-        });
-
-        await answersToQuestionsCollection
-            .insertOne({
-                date: new Date(reportDate),
-                correct_answer_1: answersArr.l1_correct,
-                correct_answer_2: answersArr.l2_correct,
-                correct_answer_3: answersArr.l3_correct,
-                wrong_answer_1: answersArr.l1_wrong,
-                wrong_answer_2: answersArr.l2_wrong,
-                wrong_answer_3: answersArr.l3_wrong,
-                report_type: reportType
-            })
-            .catch(e => {
-                console.log("ERROR 56", e);
-            });
+    if (!pastDuels.length) {
+        return
     }
+
+    pastDuels.forEach(duel => {
+        for (let user of [1, 2]) {
+            if (duel[`user${user}_answers`]) {
+                duel[`user${user}_answers`].forEach(questionItem => {
+                    let question = JSON.parse(questionItem);
+
+                    if (question.user_answer_is_right) {
+                        answersArr[`l${question.level}_correct`] += 1;
+                    } else answersArr[`l${question.level}_wrong`] += 1;
+                });
+            }
+        }
+    });
+
+    await Api.insertOne(ANSWER_TO_QUESTION_REPORT_BUCKET, {
+        date: new Date(reportDate),
+        correct_answer_1: answersArr.l1_correct,
+        correct_answer_2: answersArr.l2_correct,
+        correct_answer_3: answersArr.l3_correct,
+        wrong_answer_1: answersArr.l1_wrong,
+        wrong_answer_2: answersArr.l2_wrong,
+        wrong_answer_3: answersArr.l3_wrong,
+        report_type: reportType
+    })
 
     return true;
 }
@@ -123,41 +113,21 @@ export async function questionReport(reportType, dateFrom, dateTo) {
 export async function matchReport(reportType, dateFrom, dateTo) {
     dateFrom = new Date(dateFrom);
     dateTo = new Date(dateTo);
-    let reportDate = new Date().setDate(new Date().getDate() - 1)
+    const reportDate = new Date().setDate(new Date().getDate() - 1)
 
-    const db = await database().catch(err => console.log("ERROR: 21", err));
-    const pastMatchesCollection = db.collection(`bucket_${PAST_MATCHES_BUCKET_ID}`);
-    const matchReportCollection = db.collection(`bucket_${MATCH_REPORT_BUCKET_ID}`);
-    const rewardLogsCollection = db.collection(`bucket_${REWARD_LOGS_BUCKET_ID}`);
-    const buggedRewardsCollection = db.collection(`bucket_${BUGGED_REWARD_BUCKET_ID}`);
-
-    let p2pMatchCount = 0,
-        p2pMatchPointsEarned = 0,
-        p2mMatchCount = 0,
+    let p2pMatchPointsEarned = 0,
         p2mMatchPointsEarned = 0,
         daily_reward_earned = 0;
 
-    const p2pMatches = await pastMatchesCollection
-        .find({
-            duel_type: 0,
-            end_time: {
-                $gte: dateFrom,
-                $lt: dateTo
-            }
-        })
-        .toArray()
-        .catch(err => console.log("ERROR: 23", err));
+    const matches = await Api.getMany(PAST_MATCH_BUCKET, {
+        end_time: {
+            $gte: dateFrom,
+            $lt: dateTo
+        }
+    })
 
-    const p2mMatches = await pastMatchesCollection
-        .find({
-            duel_type: 1,
-            end_time: {
-                $gte: dateFrom,
-                $lt: dateTo
-            }
-        })
-        .toArray()
-        .catch(err => console.log("ERROR: 24", err));
+    const p2pMatches = matches.filter(el => el.player_type == 0)
+    const p2mMatches = matches.filter(el => el.player_type == 1)
 
     p2pMatches.forEach(match => {
         if (match.winner == 1 || match.winner == 2) {
@@ -167,6 +137,7 @@ export async function matchReport(reportType, dateFrom, dateTo) {
         }
         p2pMatchPointsEarned += match.points_earned;
     });
+
     p2mMatches.forEach(match => {
         if (match.winner == 1 || match.winner == 3) {
             daily_reward_earned += 2
@@ -174,95 +145,46 @@ export async function matchReport(reportType, dateFrom, dateTo) {
         p2mMatchPointsEarned += match.points_earned;
     });
 
-    p2pMatchCount = p2pMatches.length;
-    p2mMatchCount = p2mMatches.length;
+    const rewardDaily = await Api.getCount(REWARD_LOG_BUCKET, {
+        offer_id: DAILY_1GB_OFFER_ID,
+        date: {
+            $gte: dateFrom,
+            $lt: dateTo
+        }
+    })
 
-    const rewardDailyTrue = await rewardLogsCollection
-        .find({
-            offer_id: DAILY_1GB_OFFER_ID,
-            status: true,
-            date: {
-                $gte: dateFrom,
-                $lt: dateTo
-            }
-        })
-        .count()
-        .catch(err => console.log("ERROR: 53", err));
+    const rewardDailyTrue = rewardDaily.filter(el => el.status)
+    const rewardDailyFalse = rewardDaily.filter(el => !el.status)
+    const rewardDailyMatchTrue = rewardDailyTrue.filter(el => el.type == 'match')
+    const rewardDailyChargeTrue = rewardDailyTrue.filter(el => el.type == 'charge')
 
-    const rewardDailyFalse = await buggedRewardsCollection
-        .find({
-            offer_id: DAILY_1GB_OFFER_ID,
-            status: false,
-            date: {
-                $gte: dateFrom,
-                $lt: dateTo
-            }
-        })
-        .count()
-        .catch(err => console.log("ERROR: 54", err));
-
-
-    const rewardDailyMatchTrue = await rewardLogsCollection
-        .find({
-            offer_id: DAILY_1GB_OFFER_ID,
-            status: true,
-            type: 'match',
-            date: {
-                $gte: dateFrom,
-                $lt: dateTo
-            }
-        })
-        .count()
-        .catch(err => console.log("ERROR", err));
-
-
-    const rewardDailyChargeTrue = await rewardLogsCollection
-        .find({
-            offer_id: DAILY_1GB_OFFER_ID,
-            status: true,
-            type: 'charge',
-            date: {
-                $gte: dateFrom,
-                $lt: dateTo
-            }
-        })
-        .count()
-        .catch(err => console.log("ERROR", err));
-
-
-    await matchReportCollection
-        .insertOne({
-            date: new Date(reportDate),
-            p2p_play: p2pMatchCount,
-            p2p_play_points_earned: p2pMatchPointsEarned,
-            p2m_play: p2mMatchCount,
-            p2m_play_points_earned: p2mMatchPointsEarned,
-            daily_match_reward: rewardDailyMatchTrue,
-            daily_charge_reward: rewardDailyChargeTrue,
-            daily_reward_true: rewardDailyTrue,
-            daily_reward_false: rewardDailyFalse,
-            daily_reward_earned: daily_reward_earned,
-            report_type: reportType
-        })
-        .catch(err => console.log("ERROR: 27", err));
+    await Api.insertOne(MATCH_REPORT_BUCKET, {
+        date: new Date(reportDate),
+        p2p_play: p2pMatches.length,
+        p2p_play_points_earned: p2pMatchPointsEarned,
+        p2m_play: p2mMatches.length,
+        p2m_play_points_earned: p2mMatchPointsEarned,
+        daily_match_reward: rewardDailyMatchTrue,
+        daily_charge_reward: rewardDailyChargeTrue,
+        daily_reward_true: rewardDailyTrue,
+        daily_reward_false: rewardDailyFalse,
+        daily_reward_earned: daily_reward_earned,
+        report_type: reportType
+    })
 
     return true;
 }
 
 export async function chargeReportExport(reportType, dateFrom, dateTo) {
-    const db = await database().catch(err => console.log("ERROR 40: ", err));
     dateFrom = new Date(dateFrom);
     dateTo = new Date(dateTo);
-    let reportDate = new Date().setDate(new Date().getDate() - 1)
-
-    const chargesCollection = db.collection(`bucket_${CHARGE_LOGS_BUCKET_ID}`);
-    const chargeReportCollection = db.collection(`bucket_${CHARGE_REPORT_BUCKET_ID}`);
-    const playCountCollection = db.collection(`bucket_${PLAY_COUNT_LOGS_BUCKET_ID}`);
+    const reportDate = new Date().setDate(new Date().getDate() - 1)
 
     let missingPlayCount = 0;
-    const playCounts = await playCountCollection.find({
+
+    const playCounts = await Api.getMany(PLAY_COUNT_LOG_BUCKET, {
         created_at: { $gte: dateFrom, $lt: dateTo }
-    }).toArray().catch(err => console.log("ERROR", err))
+    })
 
     playCounts.forEach(el => {
         el.added_play_count.forEach(playCounts => {
@@ -270,81 +192,39 @@ export async function chargeReportExport(reportType, dateFrom, dateTo) {
         })
     })
 
-    const chargesSuccessful = await chargesCollection
-        .find({ date: { $gte: dateFrom, $lt: dateTo }, status: true })
-        .toArray()
-        .catch(err => console.log("ERROR 41: ", err));
+    const chargesSuccessful = await Api.getMany(CHARGE_LOG_BUCKET, {
+        date: { $gte: dateFrom, $lt: dateTo }, status: true
+    })
 
-    const error1 = await chargesCollection
-        .find({
-            date: { $gte: dateFrom, $lt: dateTo },
-            status: false,
-            user_text:
-                "Devam eden diğer işlemlerden dolayı GNC Oyun aboneliği gerçekleştirilememektedir."
+    let totalQuantity = chargesSuccessful.length;
+
+    const errorsMsgArr = [
+        "Devam eden diğer işlemlerden dolayı GNC Oyun aboneliği gerçekleştirilememektedir.",
+        "Abone kredisi(bakiyesi) yetersiz.",
+        "Abone bulunamadi.",
+        "Abone kara listede islem yapilamaz.",
+        "Hattiniz Katma Degerli Servis aboneligine kapali oldugu icin GNC Oyun servisine abonelik talebiniz gerceklestirilememistir. Abonelik izninizi 532?yi arayarak actirabilirsiniz.",
+        "Rahat Hatlar bu servisten yararlanamazlar.",
+        "Sistemlerde oluşan hata sebebi ile işleminiz yapılamıyor. İşleminiz tekrar denenmek üzere kuyruğa atılmıştır.",
+    ]
+
+    const errors = await Api.getMany(CHARGE_LOG_BUCKET, {
+        date: { $gte: dateFrom, $lt: dateTo },
+        status: false
+    })
+
+    const errorsLengthArr = []
+
+    errorsMsgArr.forEach(errMsg => {
+        const temptArr = errors.filter(err => err.user_text == errMsg);
+        errorsLengthArr.push({
+            msg: errMsg,
+            quantity: temptArr.length
         })
-        .toArray()
-        .catch(err => console.log("ERROR 42: ", err));
+        totalQuantity += temptArr.length;
+    })
 
-    const error2 = await chargesCollection
-        .find({
-            date: { $gte: dateFrom, $lt: dateTo },
-            status: false,
-            user_text: "Abone kredisi(bakiyesi) yetersiz."
-        })
-        .toArray()
-        .catch(err => console.log("ERROR 43: ", err));
-
-    const error3 = await chargesCollection
-        .find({
-            date: { $gte: dateFrom, $lt: dateTo },
-            status: false,
-            user_text: "Abone bulunamadi."
-        })
-        .toArray()
-        .catch(err => console.log("ERROR 44: ", err));
-
-    const error4 = await chargesCollection
-        .find({
-            date: { $gte: dateFrom, $lt: dateTo },
-            status: false,
-            user_text: "Abone kara listede islem yapilamaz."
-        })
-        .toArray()
-        .catch(err => console.log("ERROR 45: ", err));
-
-    const error5 = await chargesCollection
-        .find({
-            date: { $gte: dateFrom, $lt: dateTo },
-            status: false,
-            user_text:
-                "Hattiniz Katma Degerli Servis aboneligine kapali oldugu icin GNC Oyun servisine abonelik talebiniz gerceklestirilememistir. Abonelik izninizi 532?yi arayarak actirabilirsiniz."
-        })
-        .toArray()
-        .catch(err => console.log("ERROR 46: ", err));
-    const error6 = await chargesCollection
-        .find({
-            date: { $gte: dateFrom, $lt: dateTo },
-            status: false,
-            user_text: "Rahat Hatlar bu servisten yararlanamazlar."
-        })
-
-        .toArray()
-        .catch(err => console.log("ERROR 47: ", err));
-
-    const error7 = await chargesCollection
-        .find({
-            date: { $gte: dateFrom, $lt: dateTo },
-            status: false,
-            user_text:
-                "Sistemlerde oluşan hata sebebi ile işleminiz yapılamıyor. İşleminiz tekrar denenmek üzere kuyruğa atılmıştır."
-        })
-
-        .toArray()
-        .catch(err => console.log("ERROR 48: ", err));
-
-    let totalQuantity = chargesSuccessful.length + error1.length + error2.length + error3.length + error4.length + error5.length + error6.length + error7.length;
-
-    const datas = [
+    const data = [
         {
             date: new Date(reportDate),
             charge_amount: CHARGE_AMOUNT,
@@ -354,83 +234,23 @@ export async function chargeReportExport(reportType, dateFrom, dateTo) {
             play_count: chargesSuccessful.length - missingPlayCount,
             error: "-",
             report_type: reportType
-        },
-        {
-            date: new Date(reportDate),
-            charge_amount: CHARGE_AMOUNT,
-            quantity: error1.length,
-            ratio: error1.length ? Number(((error1.length / totalQuantity) * 100).toFixed(2)) : 0,
-            status: "Başarısız",
-            play_count: "-",
-            error:
-                "Devam eden diğer işlemlerden dolayı GNC Oyun aboneliği gerçekleştirilememektedir.",
-            report_type: reportType
-        },
-        {
-            date: new Date(reportDate),
-            charge_amount: CHARGE_AMOUNT,
-            quantity: error2.length,
-            ratio: error2.length ? Number(((error2.length / totalQuantity) * 100).toFixed(2)) : 0,
-            status: "Başarısız",
-            play_count: "-",
-            error: "Abone kredisi(bakiyesi) yetersiz.",
-            report_type: reportType
-        },
-        {
-            date: new Date(reportDate),
-            charge_amount: CHARGE_AMOUNT,
-            quantity: error3.length,
-            ratio: error3.length ? Number(((error3.length / totalQuantity) * 100).toFixed(2)) : 0,
-            status: "Başarısız",
-            play_count: "-",
-            error: "Abone bulunamadi.",
-            report_type: reportType
-        },
-        {
-            date: new Date(reportDate),
-            charge_amount: CHARGE_AMOUNT,
-            quantity: error4.length,
-            ratio: error4.length ? Number(((error4.length / totalQuantity) * 100).toFixed(2)) : 0,
-            status: "Başarısız",
-            play_count: "-",
-            error: "Abone kara listede islem yapilamaz.",
-            report_type: reportType
-        },
-        {
-            date: new Date(reportDate),
-            charge_amount: CHARGE_AMOUNT,
-            quantity: error5.length,
-            ratio: error5.length ? Number(((error5.length / totalQuantity) * 100).toFixed(2)) : 0,
-            status: "Başarısız",
-            play_count: "-",
-            error:
-                "Hattiniz Katma Degerli Servis aboneligine kapali oldugu icin GNC Oyun servisine abonelik talebiniz gerceklestirilememistir. Abonelik izninizi 532?yi arayarak actirabilirsiniz.",
-            report_type: reportType
-        },
-        {
-            date: new Date(reportDate),
-            charge_amount: CHARGE_AMOUNT,
-            quantity: error6.length,
-            ratio: error6.length ? Number(((error6.length / totalQuantity) * 100).toFixed(2)) : 0,
-            status: "Başarısız",
-            play_count: "-",
-            error: "Rahat Hatlar bu servisten yararlanamazlar.",
-            report_type: reportType
-        },
-        {
-            date: new Date(reportDate),
-            charge_amount: CHARGE_AMOUNT,
-            quantity: error7.length,
-            ratio: error7.length ? Number(((error7.length / totalQuantity) * 100).toFixed(2)) : 0,
-            status: "Başarısız",
-            play_count: "-",
-            error:
-                "Sistemlerde oluşan hata sebebi ile işleminiz yapılamıyor. İşleminiz tekrar denenmek üzere kuyruğa atılmıştır.",
-            report_type: reportType
         }
     ];
 
-    await chargeReportCollection.insertMany(datas).catch(err => console.log("ERROR 49: ", err));
+    errorsLengthArr.forEach(err => {
+        data.push({
+            date: new Date(reportDate),
+            charge_amount: CHARGE_AMOUNT,
+            quantity: err.quantity,
+            ratio: err.quantity ? Number(((err.quantity / totalQuantity) * 100).toFixed(2)) : 0,
+            status: "Başarısız",
+            play_count: "-",
+            error: err.msg,
+            report_type: reportType
+        })
+    })
+
+    await Api.insertMany(CHARGE_REPORT_BUCKET, data)
 
     return true;
 }
@@ -438,34 +258,23 @@ export async function chargeReportExport(reportType, dateFrom, dateTo) {
 export async function userReport(reportType, dateFrom, dateTo) {
     dateFrom = new Date(dateFrom);
     dateTo = new Date(dateTo);
-    let reportDate = new Date().setDate(new Date().getDate() - 1)
+    const reportDate = new Date().setDate(new Date().getDate() - 1)
 
-    const db = await database().catch(err => console.log("ERROR: 30", err));
-    const usersCollection = db.collection(`bucket_${USER_BUCKET_ID}`);
-    const userReportCollection = db.collection(`bucket_${USER_REPORT_BUCKET_ID}`);
+    const usersCount = await Api.getCount(USER_BUCKET);
+    const newUsersCount = await Api.getCountByFilter(USER_BUCKET, {
+        created_at: {
+            $gte: dateFrom,
+            $lt: dateTo
+        }
+    })
 
-    const usersCount = await usersCollection.count();
-    const newUsersCount = await usersCollection
-        .find({
-            created_at: {
-                $gte: dateFrom,
-                $lt: dateTo
-            }
-        })
-        .count()
-        .catch(err => console.log("ERROR: 32", err));
-
-    await userReportCollection
-        .insertOne({
-            date: new Date(reportDate),
-            total_user: usersCount,
-            new_user: newUsersCount,
-            created_at: new Date(),
-            report_type: reportType
-        })
-        .catch(err => console.log("ERROR: 33", err));
-
-
+    await Api.insertOne(USER_REPORT_BUCKET, {
+        date: new Date(reportDate),
+        total_user: usersCount,
+        new_user: newUsersCount,
+        created_at: new Date(),
+        report_type: reportType
+    })
 
     return true;
 }
@@ -473,16 +282,20 @@ export async function userReport(reportType, dateFrom, dateTo) {
 async function playedMatchCount(reportType, dateFrom, dateTo) {
     dateFrom = new Date(dateFrom);
     dateTo = new Date(dateTo);
-    let reportDate = new Date().setDate(new Date().getDate() - 1)
+    const reportDate = new Date().setDate(new Date().getDate() - 1)
 
-    const db = await database().catch(err => console.log("ERROR 38", err));
-    const pastMatchesCollection = db.collection(`bucket_${PAST_MATCHES_BUCKET_ID}`);
-    const userMatchCollection = db.collection(`bucket_${USERS_MATCH_REPORT_BUCKET_ID}`);
+    const db = await Api.useDatabase();
+    const pastMatchesCollection = db.collection(`bucket_${PAST_MATCH_BUCKET}`);
+
+    const endTimeFilter = { end_time: { $gte: dateFrom, $lt: dateTo } };
+
+    const groupUsrer1 = { $group: { _id: "$user1" } };
+    const groupUsrer2 = { $group: { _id: "$user2" } };
 
     let user1Paid = await pastMatchesCollection
         .aggregate([
-            { $match: { end_time: { $gte: dateFrom, $lt: dateTo }, user1_is_free: false } },
-            { $group: { _id: "$user1" } }
+            { $match: { ...endTimeFilter, user1_is_free: false } },
+            { ...groupUsrer1 }
         ])
         .toArray()
         .catch(err => console.log("ERROR 39", err));
@@ -491,20 +304,20 @@ async function playedMatchCount(reportType, dateFrom, dateTo) {
         .aggregate([
             {
                 $match: {
-                    end_time: { $gte: dateFrom, $lt: dateTo },
-                    duel_type: 0,
+                    ...endTimeFilter,
+                    player_type: 0,
                     user2_is_free: false
                 }
             },
-            { $group: { _id: "$user2" } }
+            { ...groupUsrer2 }
         ])
         .toArray()
         .catch(err => console.log("ERROR 40", err));
 
     let user1Free = await pastMatchesCollection
         .aggregate([
-            { $match: { end_time: { $gte: dateFrom, $lt: dateTo }, user1_is_free: true } },
-            { $group: { _id: "$user1" } }
+            { $match: { ...endTimeFilter, user1_is_free: true } },
+            { ...groupUsrer1 }
         ])
         .toArray()
         .catch(err => console.log("ERROR 41", err));
@@ -513,86 +326,68 @@ async function playedMatchCount(reportType, dateFrom, dateTo) {
         .aggregate([
             {
                 $match: {
-                    end_time: { $gte: dateFrom, $lt: dateTo },
-                    duel_type: 0,
+                    ...endTimeFilter,
+                    player_type: 0,
                     user2_is_free: true
                 }
             },
-            { $group: { _id: "$user1" } }
+            { $group: { _id: "$user2" } }
         ])
         .toArray()
         .catch(err => console.log("ERROR 42", err));
 
-    const paidvsPaidP2P = await pastMatchesCollection
-        .find({
-            duel_type: 0,
-            user1_is_free: false,
-            user2_is_free: false,
-            end_time: { $gte: dateFrom, $lt: dateTo }
-        })
-        .count()
-        .catch(err => console.log("ERROR 43", err));
 
-    const freevsPaidP2P = await pastMatchesCollection
-        .find({
-            duel_type: 0,
-            $or: [
-                { user1_is_free: false, user2_is_free: true },
-                { user1_is_free: true, user2_is_free: false }
-            ],
-            end_time: { $gte: dateFrom, $lt: dateTo }
-        })
-        .count()
-        .catch(err => console.log("ERROR 44", err));
+    const paidvsPaidP2P = await Api.getCountByFilter(PAST_MATCH_BUCKET, {
+        player_type: 0,
+        user1_is_free: false,
+        user2_is_free: false,
+        ...endTimeFilter,
+    })
 
-    const paidvsBot = await pastMatchesCollection
-        .find({
-            duel_type: 1,
-            user1_is_free: false,
-            end_time: { $gte: dateFrom, $lt: dateTo }
-        })
-        .count()
-        .catch(err => console.log("ERROR 45", err));
+    const freevsPaidP2P = await Api.getCountByFilter(PAST_MATCH_BUCKET, {
+        player_type: 0,
+        $or: [
+            { user1_is_free: false, user2_is_free: true },
+            { user1_is_free: true, user2_is_free: false }
+        ],
+        ...endTimeFilter
+    })
 
-    const freevsFreeP2P = await pastMatchesCollection
-        .find({
-            duel_type: 0,
-            user1_is_free: true,
-            user2_is_free: true,
-            end_time: { $gte: dateFrom, $lt: dateTo }
-        })
-        .count()
-        .catch(err => console.log("ERROR 46", err));
+    const paidvsBot = await Api.getCountByFilter(PAST_MATCH_BUCKET, {
+        player_type: 1,
+        user1_is_free: false,
+        ...endTimeFilter
+    })
 
-    const freevsBot = await pastMatchesCollection
-        .find({
-            duel_type: 1,
-            user1_is_free: true,
-            end_time: { $gte: dateFrom, $lt: dateTo }
-        })
-        .count()
-        .catch(err => console.log("ERROR 47", err));
+    const freevsFreeP2P = await Api.getCountByFilter(PAST_MATCH_BUCKET, {
+        player_type: 0,
+        user1_is_free: true,
+        user2_is_free: true,
+        ...endTimeFilter
+    })
+
+    const freevsBot = await Api.getCountByFilter(PAST_MATCH_BUCKET, {
+        player_type: 1,
+        user1_is_free: true,
+        ...endTimeFilter
+    })
 
     user1Paid = user1Paid.map(el => el._id);
     user2Paid = user2Paid.map(el => el._id);
     user1Free = user1Free.map(el => el._id);
     user2Free = user2Free.map(el => el._id);
+
     let paid = [...new Set([...user1Paid, ...user2Paid])];
     let free = [...new Set([...user1Free, ...user2Free])];
-    paid = paid.length;
-    free = free.length;
 
-    await userMatchCollection
-        .insertOne({
-            date: new Date(reportDate),
-            paid_player: paid,
-            free_player: free,
-            paid_play_total: paidvsPaidP2P * 2 + freevsPaidP2P + paidvsBot,
-            free_play_total: freevsFreeP2P * 2 + freevsPaidP2P + freevsBot,
-            report_type: reportType
-        })
-        .catch(err => console.log("ERROR 48", err));
-
+    await Api.insertOne(USER_MATCH_REPORT_BUCKET, {
+        date: new Date(reportDate),
+        paid_player: paid.length,
+        free_player: free.length,
+        paid_play_total: paidvsPaidP2P * 2 + freevsPaidP2P + paidvsBot,
+        free_play_total: freevsFreeP2P * 2 + freevsPaidP2P + freevsBot,
+        report_type: reportType
+    })
 
     return true;
 }
@@ -600,88 +395,71 @@ async function playedMatchCount(reportType, dateFrom, dateTo) {
 async function matchWinLoseCount(reportType, dateFrom, dateTo) {
     dateFrom = new Date(dateFrom);
     dateTo = new Date(dateTo);
-    let reportDate = new Date().setDate(new Date().getDate() - 1)
 
-    const db = await database().catch(err => console.log("ERROR 50", err));
-    const pastMatchesCollection = db.collection(`bucket_${PAST_MATCHES_BUCKET_ID}`);
-    const winLoseCollection = db.collection(`bucket_${WIN_LOSE_MATCHES_BUCKET_ID}`);
+    const reportDate = new Date().setDate(new Date().getDate() - 1)
+    const endTimeFilter = { end_time: { $gte: dateFrom, $lt: dateTo } };
 
-    let freeWin = await pastMatchesCollection
-        .find({
-            end_time: { $gte: dateFrom, $lt: dateTo },
-            $or: [
-                { user1_is_free: true, winner: 1 },
-                { user2_is_free: true, winner: 2, duel_type: 0 }
-            ]
-        })
-        .count();
+    const freeWin = await Api.getCountByFilter(PAST_MATCH_BUCKET, {
+        ...endTimeFilter,
+        $or: [
+            { user1_is_free: true, winner: 1 },
+            { user2_is_free: true, winner: 2, player_type: 0 }
+        ]
+    })
 
-    let freeLose = await pastMatchesCollection
-        .find({
-            end_time: { $gte: dateFrom, $lt: dateTo },
-            $or: [
-                { user1_is_free: true, winner: 2 },
-                { user2_is_free: true, winner: 1, duel_type: 0 }
-            ]
-        })
-        .count();
+    const freeLose = await Api.getCountByFilter(PAST_MATCH_BUCKET, {
+        ...endTimeFilter,
+        $or: [
+            { user1_is_free: true, winner: 2 },
+            { user2_is_free: true, winner: 1, player_type: 0 }
+        ]
+    })
 
-    let freeEqual = await pastMatchesCollection
-        .find({
-            end_time: { $gte: dateFrom, $lt: dateTo },
-            $or: [
-                { user1_is_free: true, winner: 3 },
-                { user2_is_free: true, winner: 3, duel_type: 0 }
-            ]
-        })
-        .count();
+    const freeEqual = await Api.getCountByFilter(PAST_MATCH_BUCKET, {
+        ...endTimeFilter,
+        $or: [
+            { user1_is_free: true, winner: 3 },
+            { user2_is_free: true, winner: 3, player_type: 0 }
+        ]
+    })
 
-    let paidWin = await pastMatchesCollection
-        .find({
-            end_time: { $gte: dateFrom, $lt: dateTo },
-            $or: [
-                { user1_is_free: false, winner: 1 },
-                { user2_is_free: false, winner: 2, duel_type: 0 }
-            ]
-        })
-        .count();
-
-    let paidLose = await pastMatchesCollection
-        .find({
-            end_time: { $gte: dateFrom, $lt: dateTo },
-            $or: [
-                { user1_is_free: false, winner: 2 },
-                { user2_is_free: false, winner: 1, duel_type: 0 }
-            ]
-        })
-        .count();
-
-    let paidEqual = await pastMatchesCollection
-        .find({
-            end_time: { $gte: dateFrom, $lt: dateTo },
-            $or: [
-                { user1_is_free: false, winner: 3 },
-                { user2_is_free: false, winner: 3, duel_type: 0 }
-            ]
-        })
-        .count();
-
-    await winLoseCollection
-        .insertOne({
-            date: new Date(reportDate),
-            win_paid: paidWin,
-            win_free: freeWin,
-            lose_paid: paidLose,
-            lose_free: freeLose,
-            equal_paid: paidEqual,
-            equal_free: freeEqual,
-            win_total: paidWin + freeWin,
-            lose_total: paidLose + freeLose,
-            report_type: reportType
-        })
-        .catch(err => console.log("ERROR 51", err));
+    const paidWin = await Api.getCountByFilter(PAST_MATCH_BUCKET, {
+        ...endTimeFilter,
+        $or: [
+            { user1_is_free: false, winner: 1 },
+            { user2_is_free: false, winner: 2, player_type: 0 }
+        ]
+    })
 
 
+    const paidLose = await Api.getCountByFilter(PAST_MATCH_BUCKET, {
+        ...endTimeFilter,
+        $or: [
+            { user1_is_free: false, winner: 2 },
+            { user2_is_free: false, winner: 1, player_type: 0 }
+        ]
+    })
+
+    const paidLose = await Api.getCountByFilter(PAST_MATCH_BUCKET, {
+        ...endTimeFilter,
+        $or: [
+            { user1_is_free: false, winner: 3 },
+            { user2_is_free: false, winner: 3, player_type: 0 }
+        ]
+    })
+
+    await Api.insertOne(WIN_LOSE_MATCH_BUCKET_ID, {
+        date: new Date(reportDate),
+        win_paid: paidWin,
+        win_free: freeWin,
+        lose_paid: paidLose,
+        lose_free: freeLose,
+        equal_paid: paidEqual,
+        equal_free: freeEqual,
+        win_total: paidWin + freeWin,
+        lose_total: paidLose + freeLose,
+        report_type: reportType
+    })
 
     return true;
 }
@@ -691,22 +469,17 @@ export async function retryReport(reportType, dateFrom, dateTo) {
         $gte: new Date(dateFrom),
         $lt: new Date(dateTo)
     };
-    let reportDate = new Date().setDate(new Date().getDate() - 1)
-
-    const db = await database().catch(err => console.log("ERROR: 30", err));
-    const manualRewardCollection = db.collection(`bucket_${MANUALLY_REWARD_BUCKET_ID}`);
-    const retryReportCollection = db.collection(`bucket_${RETRY_REPORT_BUCKET_ID}`);
+    const reportDate = new Date().setDate(new Date().getDate() - 1)
 
     let hourly_retry_false = 0,
         hourly_retry_true = 0,
         daily_retry_false = 0,
         daily_retry_true = 0;
 
-    const manualRewards = await manualRewardCollection.find({
+    const manualRewards = await Api.getMany(MANUALLY_REWARD_BUCKET, {
         created_at: dateFilter,
         system: true
-    }).toArray().catch(err => console.log("ERROR ", err))
-
+    })
 
     manualRewards.forEach(reward => {
         if (reward.reward == 'hourly_1') {
@@ -720,16 +493,14 @@ export async function retryReport(reportType, dateFrom, dateTo) {
         }
     })
 
-    await retryReportCollection
-        .insertOne({
-            hourly_retry_false: hourly_retry_false,
-            hourly_retry_true: hourly_retry_true,
-            daily_retry_false: daily_retry_false,
-            daily_retry_true: daily_retry_true,
-            date: new Date(reportDate),
-            report_type: reportType
-        })
-        .catch(err => console.log("ERROR: 33", err));
+    await Api.insertOne(RETRY_REPORT_BUCKET, {
+        hourly_retry_false,
+        hourly_retry_true,
+        daily_retry_false,
+        daily_retry_true,
+        date: new Date(reportDate),
+        report_type: reportType
+    })
 
     return true;
 }
@@ -737,11 +508,10 @@ export async function retryReport(reportType, dateFrom, dateTo) {
 export async function getFailedRewards(reportType, dateFrom, dateTo) {
     dateFrom = new Date(dateFrom);
     dateTo = new Date(dateTo);
-    let reportDate = new Date().setDate(new Date().getDate() - 1)
+    const reportDate = new Date().setDate(new Date().getDate() - 1)
 
-    const db = await database().catch(err => console.log("ERROR ", err));
-    const rewardLogsCollection = db.collection(`bucket_${BUGGED_REWARD_BUCKET_ID}`);
-    const rewardReportCollection = db.collection(`bucket_${REWARD_REPORT_BUCKET_ID}`);
+    const db = await Api.useDatabase();
+    const rewardLogsCollection = db.collection(`bucket_${BUGGED_REWARD_BUCKET}`);
 
     let rewardHourlyFalse = await rewardLogsCollection
         .aggregate([
@@ -763,6 +533,7 @@ export async function getFailedRewards(reportType, dateFrom, dateTo) {
         totalReward += reward.count;
     }
 
+    const promises = [];
     for (let reward of rewardHourlyFalse) {
         let data = {
             date: new Date(reportDate),
@@ -771,115 +542,25 @@ export async function getFailedRewards(reportType, dateFrom, dateTo) {
             error_text: reward._id,
             report_type: reportType
         }
-        await rewardReportCollection.insertOne(data).catch(err => console.log("ERROR ", err))
+        promises.push(Api.insertOne(REWARD_REPORT_BUCKET, data))
     }
 
+    await Promise.all(promises);
     return true
 }
 
 export async function reportExportSend(title, reportType) {
-    Bucket.initialize({ apikey: SECRET_API_KEY });
+    const Bucket = Api.useBucket();
     await Bucket.data
-        .insert(MAILER_BUCKET_ID, {
+        .insert(MAILER_BUCKET, {
             title: title,
             template: "report-mail",
             variables: `{"title": "${title}"}`,
             emails: [
-                "idriskaribov@gmail.com",
-                "serdar@polyhagency.com",
-                "caglar@polyhagency.com",
-                "murat.malci@turkcell.com.tr"
+                "idriskaribov@gmail.com"
             ],
             report_type: reportType
         })
         .catch(err => console.log("ERROR: 35", err));
     return true;
-}
-
-export async function executeReportDailyMan(req, res) {
-    // let date = new Date().setDate(new Date().getDate() - 1)
-    // let dateFrom = new Date(date).setHours(0, 0, 0);
-    // let dateTo = new Date(date).setHours(23, 59, 59);
-
-    // await questionReport(0, dateFrom, dateTo).catch(err => console.log("ERROR: 1", err));
-    // await userReport(0, dateFrom, dateTo).catch(err => console.log("ERROR: 4", err));
-    // await playedMatchCount(0, dateFrom, dateTo).catch(err => console.log("ERROR: 49", err));
-    // await matchReport(0, dateFrom, dateTo).catch(err => console.log("ERROR: 2", err));
-    // await matchWinLoseCount(0, dateFrom, dateTo).catch(err => console.log("ERROR: 55", err));
-    // await chargeReportExport(0, dateFrom, dateTo).catch(err => console.log("ERROR: 3", err));
-    // await retryReport(0, dateFrom, dateTo).catch(err => console.log("ERROR: ", err));
-    // await getFailedRewards(0, dateFrom, dateTo).catch(err => console.log("ERROR: ", err));
-
-    await reportExportSend("Günlük Rapor", 0).catch(err => console.log("ERROR: 5", err));
-
-    return res.status(200).send({ message: 'ok' });
-}
-
-export async function executeReportWeeklyMan(req, res) {
-    // let date = new Date().setDate(new Date().getDate() - 1)
-    // let dateFrom = new Date(date).setHours(0, 0, 0);
-    // let dateTo = new Date(date).setHours(23, 59, 59);
-
-    // await questionReport(1, dateFrom, dateTo).catch(err => console.log("ERROR: 57", err));
-    // await userReport(1, dateFrom, dateTo).catch(err => console.log("ERROR: 58", err));
-    // await playedMatchCount(1, dateFrom, dateTo).catch(err => console.log("ERROR: 59", err));
-    // await matchReport(1, dateFrom, dateTo).catch(err => console.log("ERROR: 60", err));
-    // await matchWinLoseCount(1, dateFrom, dateTo).catch(err => console.log("ERROR: 61", err));
-    // await chargeReportExport(1, dateFrom, dateTo).catch(err => console.log("ERROR: 62", err));
-    // await retryReport(1, dateFrom, dateTo).catch(err => console.log("ERROR: ", err));
-    // await getFailedRewards(1, dateFrom, dateTo).catch(err => console.log("ERROR: ", err));
-
-
-    await reportExportSend("Haftalık Toplam Rapor", 1).catch(err => console.log("ERROR: 63", err));
-    await reportExportSend("Haftalık Gün Bazlı Rapor", 11).catch(err =>
-        console.log("ERROR: 63", err)
-    );
-
-    return res.status(200).send({ message: 'ok' });
-}
-
-
-export async function executeReportMonthlyMan() {
-    console.log("@mounthly-report")
-    // await reportExportSend("Aylık Gün Bazlı Rapor Güncel", 22).catch(err =>
-    //     console.log("ERROR: 163", err)
-    // );
-    await reportExportSend("Aylık Toplam Rapor Güncel", 2).catch(err =>
-        console.log("ERROR: 163", err)
-    );
-
-    return true;
-}
-
-const json2csv = require("json2csv").parse;
-export async function matchChargeCountList(req, res) {
-    const db = await database().catch(err => console.log("ERROR ", err));
-
-    let begin = new Date("12/22/2021, 00:00:01")
-    let end = new Date("1/18/2022, 23:59:59")
-    const chargeCollection = db.collection(`bucket_${CHARGE_LOGS_BUCKET_ID}`);
-
-    const datas = await chargeCollection
-        .aggregate([
-            {
-                $match: {
-                    status: true,
-                    date: {
-                        $gte: begin,
-                        $lt: end
-                    }
-                }
-            },
-            { $group: { _id: "$msisdn", count: { $sum: 1 } } },
-            { $sort: { count: -1 } }
-        ]).toArray()
-        .catch(err => console.log("ERROR ", err));
-
-    let formattedString = json2csv(datas, { fields: ['_id', 'count'] });
-    res.headers.set(
-        "Content-Disposition",
-        "attachment; filename=math.xlsx"
-    );
-    res.headers.set("Content-Type", "application/octet-stream");
-    return res.status(200).send(formattedString);
 }

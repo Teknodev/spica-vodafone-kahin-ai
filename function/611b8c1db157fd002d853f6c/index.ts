@@ -1,160 +1,83 @@
-import { database, ObjectId } from "@spica-devkit/database";
-import * as Identity from "@spica-devkit/identity";
-var jwt = require("jsonwebtoken");
+import * as Api from "../../63b57559ebfd83002c5defe5/.build";
+import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
+import * as Helper from "../../633bf949956545002c9b7e31/.build";
 
-const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
-const USER_BUCKET_ID = process.env.USER_BUCKET_ID;
-const DUEL_BUCKET_ID = process.env.DUEL_BUCKET_ID;
-const SECRET_API_KEY = process.env.SECRET_API_KEY;
-
-
-let db;
+const DUEL_BUCKET = Environment.env.BUCKET.DUEL;
+const USER_BUCKET = Environment.env.BUCKET.USER;
 
 export async function playCountDecrease(req, res) {
-	const { userId } = req.body;
+    const { userId } = req.body;
 
-	if (!db) {
-		db = await database().catch(err => console.log("ERROR 30", err));
-	}
+    const token = Helper.getTokenByReq(req);
+    const decodedToken = await Helper.getDecodedToken(token)
+    if (!decodedToken) {
+        return res.status(400).send({ message: "Token is not verified." });
+    }
 
-	let token = getToken(req.headers.get("authorization"));
-	let token_object = await tokenVerified(token);
+    const user = await Api.getOne(USER_BUCKET, { _id: Api.toObjectId(userId) });
+    let setQuery = {
+        available_play_count: Math.max(
+            user.available_play_count - 1,
+            0
+        )
+    }
 
-	const userCollection = db.collection(`bucket_${USER_BUCKET_ID}`);
+    if (user.free_play) {
+        setQuery = { free_play: false }
+    }
 
-	if (token_object.error === false) {
-		let setQuery = {}
-		const user = await userCollection.findOne({ _id: ObjectId(userId) }).catch(err => {
-			console.log("ERROR 1 ", err)
-		})
+    await Api.updateOne(USER_BUCKET, { _id: Api.toObjectId(userId) }, { $set: setQuery })
 
-		if (user.free_play) {
-			setQuery = { free_play: false }
-		} else setQuery = {
-			available_play_count: Math.max(
-				user.available_play_count - 1,
-				0
-			)
-		}
+    return res.status(200).send({ message: "successful" });
 
-		await userCollection.updateOne({ _id: ObjectId(userId) }, {
-			$set: setQuery
-		}).catch(err => console.log("ERROR 2 ", err))
-
-		return res.status(200).send({ message: "successful" });
-	} else {
-		return res.status(400).send({ message: "Token is not verified." });
-	}
 }
 
 export async function setReady(req, res) {
-	const { duelId, user_placement } = req.body;
+    const { duelId, user_placement } = req.body;
 
-	if (!db) {
-		db = await database().catch(err => console.log("ERROR 30", err));
-	}
+    const token = Helper.getTokenByReq(req);
+    const decodedToken = await Helper.getDecodedToken(token)
+    if (!decodedToken) {
+        return res.status(400).send({ message: "Token is not verified." });
+    }
 
-	let token = getToken(req.headers.get("authorization"));
-	let token_object = await tokenVerified(token);
+    await Api.updateOne(DUEL_BUCKET, { _id: Api.toObjectId(duelId) }, {
+        $set: {
+            [user_placement]: true
+        }
+    })
 
-	const duelCollection = db.collection(`bucket_${DUEL_BUCKET_ID}`);
-
-	if (token_object.error === false) {
-		let setQuery = {}
-		setQuery[user_placement] = true
-		await duelCollection.updateOne({ _id: ObjectId(duelId) }, {
-			$set: setQuery
-		}).catch(err => console.log("ERROR 2 ", err))
-		return res.status(200).send({ message: "successful" });
-	} else {
-		return res.status(400).send({ message: "Token is not verified." });
-	}
+    return res.status(200).send({ message: "successful" });
 }
 
 export async function changeAvatar(req, res) {
-	const { userId, avatarId } = req.body;
-	if (!db) {
-		db = await database().catch(err => console.log("ERROR 30", err));
-	}
+    const { userId, avatarId } = req.body;
 
-	let token = getToken(req.headers.get("authorization"));
-	let token_object = await tokenVerified(token);
+    const token = Helper.getTokenByReq(req);
+    const decodedToken = await Helper.getDecodedToken(token)
+    if (!decodedToken) {
+        return res.status(400).send({ message: "Token is not verified." });
+    }
 
-	const userCollection = db.collection(`bucket_${USER_BUCKET_ID}`);
+    await Api.updateOne(USER_BUCKET, { _id: Api.toObjectId(userId) }, {
+        $set: { avatar_id: avatarId }
+    })
 
-	if (token_object.error === false) {
-		await userCollection.updateOne({ _id: ObjectId(userId) }, {
-			$set: { avatar_id: avatarId }
-		}).catch(err => console.log("ERROR 2 ", err))
-		return res.status(200).send({ message: "successful" });
-	} else {
-		return res.status(400).send({ message: "Token is not verified." });
-	}
+    return res.status(200).send({ message: "successful" });
 }
 
 export async function changeName(req, res) {
     const { userId, name } = req.body;
-    if (!db) {
-        db = await database().catch(err => console.log("ERROR 30", err));
-    }
 
-    let token = getToken(req.headers.get("authorization"));
-    let token_object = await tokenVerified(token);
-
-    const userCollection = db.collection(`bucket_${USER_BUCKET_ID}`);
-
-    if (token_object.error === false) {
-        await userCollection.updateOne({ _id: ObjectId(userId) }, {
-            $set: { name: name }
-        }).catch(err => console.log("ERROR 2 ", err))
-        return res.status(200).send({ message: "successful" });
-    } else {
+    const token = Helper.getTokenByReq(req);
+    const decodedToken = await Helper.getDecodedToken(token)
+    if (!decodedToken) {
         return res.status(400).send({ message: "Token is not verified." });
     }
+
+    await Api.updateOne(USER_BUCKET, { _id: Api.toObjectId(userId) }, {
+        $set: { name: name }
+    })
+
+    return res.status(200).send({ message: "successful" });
 }
-
-function getToken(token) {
-    if (token) {
-        token = token.split(" ")[1];
-    } else {
-        token = "";
-    }
-    return token;
-}
-
-async function tokenVerified(token) {
-    /* -request object
-        error: true | false,
-        decoded_token: token
-     */
-
-    let response_object = {
-        error: false
-    };
-
-    Identity.initialize({ apikey: `${SECRET_API_KEY}` });
-    const decoded = await Identity.verifyToken(token).catch(err => response_object.error = true)
-    response_object.decoded_token = decoded;
-
-    return response_object;
-}
-
-
-// export async function addNewBots(req, res) {
-// 	if (!db) {
-// 		db = await database().catch(err => console.log("ERROR 30", err));
-// 	}
-
-// 	const { data } = req.body;
-
-// 	const botsCollection = db.collection(`bucket_61517461d0398a002e618021`);
-
-// 	data.forEach(el => {
-// 		el._id = ObjectId(el._id)
-// 	})
-
-// 	await botsCollection.insert(data).catch(err => console.log(err))
-
-
-// 	return res.status(200).send(true)
-// }

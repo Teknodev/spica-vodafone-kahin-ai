@@ -55,5 +55,6 @@ properties:
     default: 0
 primary: created_at
 icon: outbond
-order: 2
+order: 0
 history: false
+category: DevOps

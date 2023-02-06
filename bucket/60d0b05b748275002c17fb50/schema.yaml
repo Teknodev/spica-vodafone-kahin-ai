@@ -51,4 +51,5 @@ properties:
 acl:
   write: true==true
   read: true==true
-order: 19
+order: 11
+category: Reports

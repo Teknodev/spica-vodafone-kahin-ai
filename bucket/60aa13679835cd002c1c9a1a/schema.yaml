@@ -1,7 +1,7 @@
 _id: 60aa13679835cd002c1c9a1a
 title: Manually Reward
 description: Whenever you add an entry to bucket, user will get internet reward
-icon: view_stream
+icon: line_style
 primary: msisdn
 readOnly: false
 history: false
@@ -57,4 +57,5 @@ properties:
 acl:
   write: true==true
   read: true==true
-order: 13
+order: 19
+category: Logs

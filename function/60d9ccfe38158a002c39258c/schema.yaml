@@ -1,10 +1,10 @@
 _id: 60d9ccfe38158a002c39258c
-name: Add Available Play
+name: Game Flow Operations
 description: Adds new available play for the user
 language: javascript
 timeout: 60
 triggers:
-  addAvailablePlay:
+  addAvailablePlayReq:
     options:
       method: Post
       path: /add-available-play
@@ -15,27 +15,6 @@ triggers:
     options:
       method: Post
       path: /checkSMSCode
-      preflight: true
-    type: http
-    active: true
-  sessionSOAP:
-    options:
-      method: Post
-      path: /sessionSOAP
-      preflight: true
-    type: http
-    active: true
-  sendSms:
-    options:
-      method: Get
-      path: /sendSms
-      preflight: true
-    type: http
-    active: true
-  charge:
-    options:
-      method: Post
-      path: /charge
       preflight: true
     type: http
     active: true
@@ -51,28 +30,8 @@ triggers:
       type: INSERT
     type: bucket
     active: true
-  setPlayAward:
-    options:
-      method: Post
-      path: /setPlayAward
-      preflight: true
-    type: http
-    active: true
-  chargeTestMan:
-    options:
-      method: Get
-      path: /chargeTestMan
-      preflight: true
-    type: http
-    active: true
 env:
-  USER_BUCKET_ID: "{USER_BUCKET_ID}"
-  JWT_SECRET_KEY: "{JWT_SECRET_KEY}"
-  SECRET_API_KEY: "{SECRET_API_KEY}"
-  CONFIRMATION_CODE_BUCKET_ID: "{CONFIRMATION_CODE_BUCKET_ID}"
-  DUEL_BUCKET_ID: "{DUEL_BUCKET_ID}"
-  ALERT_BUCKET_ID: "{ALERT_BUCKET_ID}"
-  REWARDS_BUCKET_ID: "{REWARDS_BUCKET_ID}"
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
-  BUGGED_REWARDS_BUCKET_ID: "{BUGGED_REWARDS_BUCKET_ID}"
 memoryLimit: 100
+order: 11
+category: D_2

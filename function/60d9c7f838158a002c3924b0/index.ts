@@ -1,26 +1,19 @@
-import * as Bucket from "@spica-devkit/bucket";
-import { database, ObjectId } from "@spica-devkit/database";
+import * as Api from "../../63b57559ebfd83002c5defe5/.build";
+import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
 
-const SECRET_API_KEY = process.env.SECRET_API_KEY;
-const DUEL_ANSWERS_BUCKET_ID = process.env.DUEL_ANSWERS_BUCKET_ID;
-const DUEL_BUCKET_ID = process.env.DUEL_BUCKET_ID;
-const PAST_DUELS_BUCKET_ID = process.env.PAST_DUELS_BUCKET_ID;
-const USER_BUCKET_ID = process.env.USER_BUCKET_ID;
-
-let db, usersCollection;
+const DUEL_BUCKET = Environment.env.BUCKET.DUEL;
+const PAST_MATCH_BUCKET = Environment.env.BUCKET.PAST_MATCH;
+const USER_BUCKET = Environment.env.BUCKET.USER;
 
 export async function checkFinishedDuels() {
-    if (!db) {
-        db = await database();
-    }
-    Bucket.initialize({ apikey: SECRET_API_KEY });
-    usersCollection = db.collection(`bucket_${USER_BUCKET_ID}`);
+    const db = await Api.useDatabase();
+    const usersCollection = db.collection(`bucket_${USER_BUCKET}`);
 
     const t = new Date();
     t.setSeconds(t.getSeconds() - 130);
 
     const finishedDuels = await db
-        .collection(`bucket_${DUEL_BUCKET_ID}`)
+        .collection(`bucket_${DUEL_BUCKET}`)
         .aggregate([
             {
                 $match: {
@@ -42,7 +35,7 @@ export async function checkFinishedDuels() {
             },
             {
                 $lookup: {
-                    from: `bucket_${USER_BUCKET_ID}`,
+                    from: `bucket_${USER_BUCKET}`,
                     localField: "user1",
                     foreignField: "_id",
                     as: "user1"
@@ -53,7 +46,7 @@ export async function checkFinishedDuels() {
             },
             {
                 $lookup: {
-                    from: `bucket_${USER_BUCKET_ID}`,
+                    from: `bucket_${USER_BUCKET}`,
                     localField: "user2",
                     foreignField: "_id",
                     as: "user2"
@@ -74,16 +67,14 @@ export async function checkFinishedDuels() {
             }
         ])
         .toArray()
-        .catch(async e => {
-            db = await database();
-        });
+        .catch(console.error);
 
     if (finishedDuels) {
         for (let duel of finishedDuels) {
             let duelId = duel._id.toString();
 
             const pastDuel = await db
-                .collection(`bucket_${PAST_DUELS_BUCKET_ID}`)
+                .collection(`bucket_${PAST_MATCH_BUCKET}`)
                 .find({ duel_id: duelId })
                 .toArray();
 
@@ -137,7 +128,7 @@ export async function checkFinishedDuels() {
                 }
 
                 await db
-                    .collection(`bucket_${PAST_DUELS_BUCKET_ID}`)
+                    .collection(`bucket_${PAST_MATCH_BUCKET}`)
                     .insertOne({
                         name: duel.user1.name + " vs " + duel.user2.name,
                         user1: duel.user1._id,
@@ -149,7 +140,7 @@ export async function checkFinishedDuels() {
                         user2_points: duel.user2_points,
                         start_time: duel.created_at,
                         end_time: new Date(),
-                        duel_type: duel.duel_type,
+                        player_type: duel.player_type,
                         points_earned: duel.user1_points + duel.user2_points,
                         user1_is_free: duel.user1_is_free,
                         user2_is_free: duel.user2_is_free,
@@ -161,7 +152,7 @@ export async function checkFinishedDuels() {
                 await usersCollection
                     .findOneAndUpdate(
                         {
-                            _id: ObjectId(duel.user1._id)
+                            _id: Api.toObjectId(duel.user1._id)
                         },
                         {
                             $set: {
@@ -180,7 +171,7 @@ export async function checkFinishedDuels() {
                 await usersCollection
                     .findOneAndUpdate(
                         {
-                            _id: ObjectId(duel.user2._id)
+                            _id: Api.toObjectId(duel.user2._id)
                         },
                         {
                             $set: {
@@ -199,9 +190,9 @@ export async function checkFinishedDuels() {
             }
 
             await db
-                .collection(`bucket_${DUEL_BUCKET_ID}`)
+                .collection(`bucket_${DUEL_BUCKET}`)
                 .deleteOne({
-                    _id: ObjectId(duelId)
+                    _id: Api.toObjectId(duelId)
                 })
                 .then(data => { })
                 .catch(err => console.log("error while deleteOne _id: ObjectId(duelId)", err));

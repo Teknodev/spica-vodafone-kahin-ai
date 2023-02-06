@@ -1,11 +1,11 @@
-import { database, ObjectId } from "@spica-devkit/database";
+import * as Api from "../../63b57559ebfd83002c5defe5/.build";
+import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
+
 import fetch from 'node-fetch';
 const crypto = require("crypto");
 
-const DRAW_LOGS_BUCKET = process.env.DRAW_LOGS_BUCKET;
+const DRAW_LOG_BUCKET = Environment.env.BUCKET.DRAW_LOG;
 const OFFER_ID = 4689;
-
-let db;
 
 export async function sendChargeRequest(change) {
     let target = change.document;
@@ -28,11 +28,8 @@ export async function sendChargeRequest(change) {
 }
 
 async function sendDrawData(body) {
-    if (!db) {
-        db = await database().catch(err => console.log("ERROR 3", err));
-    }
-
-    const drawLogsCollection = db.collection(`bucket_${DRAW_LOGS_BUCKET}`);
+    const db = await Api.useDatabase();
+    const drawLogsCollection = db.collection(`bucket_${DRAW_LOG_BUCKET}`);
 
     const SHARED_SECRET = 'GYh7fU+2@yseY+!7!B5xsq_!Fftf7bYJ';
     let jsonData = {

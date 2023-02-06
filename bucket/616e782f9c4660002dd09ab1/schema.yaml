@@ -1,7 +1,7 @@
 _id: 616e782f9c4660002dd09ab1
 title: Bugged Rewards
 description: Describe your new bucket
-icon: view_stream
+icon: line_style
 primary: offer_id
 readOnly: false
 history: false
@@ -65,4 +65,5 @@ properties:
 acl:
   write: true==true
   read: true==true
-order: 25
+order: 18
+category: Logs

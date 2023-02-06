@@ -1,20 +1,21 @@
-import { database, ObjectId } from "@spica-devkit/database";
-import * as Bucket from "@spica-devkit/bucket";
+import * as Api from "../../63b57559ebfd83002c5defe5/.build";
+import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
+
 const nodemailer = require("nodemailer");
 
-const nodeMailerUser = process.env.SMTP_USER || null;
-const nodeMailerHost = process.env.SMTP_HOST || null;
-const nodeMailerPassword = process.env.SMTP_PASSWORD || null;
-const mailFrom = process.env.MAIL_FROM || null;
+const nodeMailerUser = Environment.env.MAILER.SMTP_USER || null;
+const nodeMailerHost = Environment.env.MAILER.SMTP_HOST || null;
+const nodeMailerPassword = Environment.env.MAILER.SMTP_PASSWORD || null;
+const mailFrom = Environment.env.MAILER.MAIL_FROM || null;
 
-const MATCH_REPORT_BUCKET_ID = process.env.MATCH_REPORT_BUCKET_ID;
-const CHARGE_REPORT_BUCKET_ID = process.env.CHARGE_REPORT_BUCKET_ID;
-const USERS_REPORT_BUCKET_ID = process.env.USERS_REPORT_BUCKET_ID;
-const USERS_MATCH_REPORT_BUCKET_ID = process.env.USERS_MATCH_REPORT_BUCKET_ID;
-const WIN_LOSE_MATCHES_BUCKET_ID = process.env.WIN_LOSE_MATCHES_BUCKET_ID;
-const ANSWERS_TO_QUESTION_REPORT_BUCKET_ID = process.env.ANSWERS_TO_QUESTION_REPORT_BUCKET_ID;
-const RETRY_REPORT_BUCKET_ID = process.env.RETRY_REPORT_BUCKET_ID;
-const REWARD_REPORT_BUCKET_ID = process.env.REWARD_REPORT_BUCKET_ID;
+const MATCH_REPORT_BUCKET = Environment.env.BUCKET.MATCH_REPORT;
+const CHARGE_REPORT_BUCKET = Environment.env.BUCKET.CHARGE_REPORT;
+const USER_REPORT_BUCKET = Environment.env.BUCKET.USER_REPORT;
+const USER_MATCH_REPORT_BUCKET = Environment.env.BUCKET.USER_MATCH_REPORT;
+const WIN_LOSE_MATCH_BUCKET = Environment.env.BUCKET.WIN_LOSE_MATCH;
+const ANSWER_TO_QUESTION_REPORT_BUCKET = Environment.env.BUCKET.ANSWER_TO_QUESTION_REPORT;
+const RETRY_REPORT_BUCKET = Environment.env.BUCKET.RETRY_REPORT;
+const REWARD_REPORT_BUCKET = Environment.env.BUCKET.REWARD_REPORT;
 
 /*
     REPORT TYPES: 
@@ -30,7 +31,7 @@ export default async function (change) {
         templates: process.env.TEMPLATES_BUCKET_ID
     };
 
-    Bucket.initialize({ apikey: process.env.MAILER_API_KEY });
+    const Bucket = Api.useBucket();
     let template = await Bucket.data
         .getAll(buckets.templates, {
             queryParams: { filter: `template=='${change.current.template}'` }
@@ -168,8 +169,8 @@ async function matchWinLoseCount(reportType, dateFilter) {
     }
     reportType = 0;
 
-    const db = await database();
-    const winLoseCollection = db.collection(`bucket_${WIN_LOSE_MATCHES_BUCKET_ID}`);
+    const db = await Api.useDatabase();
+    const winLoseCollection = db.collection(`bucket_${WIN_LOSE_MATCH_BUCKET}`);
 
     let winLoseData = await winLoseCollection
         .find({ report_type: reportType, date: dateFilter })
@@ -290,8 +291,8 @@ async function playedMatchCount(reportType, dateFilter) {
     }
     reportType = 0;
 
-    const db = await database();
-    const userMatchesCollection = db.collection(`bucket_${USERS_MATCH_REPORT_BUCKET_ID}`);
+    const db = await Api.useDatabase();
+    const userMatchesCollection = db.collection(`bucket_${USER_MATCH_REPORT_BUCKET}`);
 
     let userMatches = await userMatchesCollection
         .find({ report_type: reportType, date: dateFilter }, { $sort: { _id: 1 } })
@@ -400,8 +401,8 @@ async function matchGeneralReport(reportType, dateFilter) {
     }
     reportType = 0;
 
-    const db = await database();
-    const matchCollection = db.collection(`bucket_${MATCH_REPORT_BUCKET_ID}`);
+    const db = await Api.useDatabase();
+    const matchCollection = db.collection(`bucket_${MATCH_REPORT_BUCKET}`);
 
     let matchData = await matchCollection
         .find({ report_type: reportType, date: dateFilter })
@@ -551,9 +552,9 @@ async function questionsReport(reportType, dateFilter) {
     }
     reportType = 0;
 
-    const db = await database();
+    const db = await Api.useDatabase();
     const answersToQuestionsCollection = db.collection(
-        `bucket_${ANSWERS_TO_QUESTION_REPORT_BUCKET_ID}`
+        `bucket_${ANSWER_TO_QUESTION_REPORT_BUCKET}`
     );
 
     let answersData = await answersToQuestionsCollection
@@ -680,8 +681,8 @@ async function chargeReport(reportType, dateFilter) {
         reportType = 0;
     }
 
-    const db = await database();
-    const chargeCollection = db.collection(`bucket_${CHARGE_REPORT_BUCKET_ID}`);
+    const db = await Api.useDatabase();
+    const chargeCollection = db.collection(`bucket_${CHARGE_REPORT_BUCKET}`);
 
     let chargeData = await chargeCollection
         .find({ report_type: reportType, date: dateFilter })
@@ -795,8 +796,8 @@ async function retryReport(reportType, dateFilter) {
         reportType = 0;
     }
 
-    const db = await database();
-    const retryCollection = db.collection(`bucket_${RETRY_REPORT_BUCKET_ID}`);
+    const db = await Api.useDatabase();
+    const retryCollection = db.collection(`bucket_${RETRY_REPORT_BUCKET}`);
 
     let retryData = await retryCollection
         .find({ report_type: reportType, date: dateFilter })
@@ -858,8 +859,8 @@ async function usersReport(reportType, dateFilter) {
         reportType = 0;
     }
 
-    const db = await database();
-    const usersCollection = db.collection(`bucket_${USERS_REPORT_BUCKET_ID}`);
+    const db = await Api.useDatabase();
+    const usersCollection = db.collection(`bucket_${USER_REPORT_BUCKET}`);
 
     let usersData = await usersCollection
         .find({ report_type: reportType, date: dateFilter })
@@ -921,8 +922,8 @@ async function rewardReport(reportType, dateFilter) {
         reportType = 0;
     }
 
-    const db = await database();
-    const rewardCollection = db.collection(`bucket_${REWARD_REPORT_BUCKET_ID}`);
+    const db = await Api.useDatabase();
+    const rewardCollection = db.collection(`bucket_${REWARD_REPORT_BUCKET}`);
 
     let rewardData = await rewardCollection
         .find({ report_type: reportType, date: dateFilter })
@@ -951,7 +952,7 @@ async function rewardReport(reportType, dateFilter) {
     let rewardBody = "";
     let total = 0;
     let lastDate = "";
-    
+
     rewardData.forEach((reward, index) => {
         total += reward.count;
     })
@@ -961,7 +962,7 @@ async function rewardReport(reportType, dateFilter) {
             let now = new Date();
             date = now.setDate(now.getDate() - 1);
         }
-        
+
         if (lastDate && lastDate != new Date(date).toDateString()) {
             rewardBody += `
                 <tr>

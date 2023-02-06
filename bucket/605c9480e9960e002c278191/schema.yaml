@@ -19,12 +19,6 @@ properties:
     description: Description of the name input
     options:
       position: bottom
-  profile_photo:
-    type: storage
-    title: profile_photo
-    description: profile_photo of an user
-    options:
-      position: bottom
   perm_accept:
     type: boolean
     title: perm_accept
@@ -32,14 +26,6 @@ properties:
     options:
       position: bottom
     default: false
-  elo:
-    type: number
-    title: elo
-    description: Description of the elo input
-    options:
-      position: bottom
-    minimum: 0
-    default: 0
   bot:
     type: boolean
     title: bot
@@ -107,12 +93,6 @@ properties:
       position: bottom
     default: 0
     minimum: 0
-  avatar_color:
-    type: string
-    title: avatar_color
-    description: Description of the avatar_color input
-    options:
-      position: bottom
   weekly_award:
     type: number
     title: weekly_award
@@ -132,13 +112,6 @@ properties:
     description: Description of the note input
     options:
       position: bottom
-  draw_confirmated:
-    type: boolean
-    title: draw_confirmated
-    description: Description of the draw_confirmated input
-    options:
-      position: bottom
-    default: false
 acl:
   write: |-
     auth.attributes.role == "admin" ||
@@ -146,4 +119,4 @@ acl:
     auth.key == "e5wl18kmw287kr"
   read: true==true
 required: []
-order: 5
+order: 22

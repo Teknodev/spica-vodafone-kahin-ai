@@ -1,5 +1,5 @@
 _id: 60d9c96d38158a002c3924f5
-name: User Rank Index
+name: _User Rank Index
 description: Finds user rank with devkit/database
 language: javascript
 timeout: 65
@@ -18,16 +18,8 @@ triggers:
       preflight: true
     type: http
     active: true
-  manuallySendDrawFn:
-    options:
-      method: Get
-      path: /manuallySendDrawFn
-      preflight: true
-    type: http
-    active: true
 env:
-  SECRET_API_KEY: "{SECRET_API_KEY}"
-  USER_BUCKET_ID: "{USER_BUCKET_ID}"
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
-  CONFIRMATION_CODE_BUCKET_ID: "{CONFIRMATION_CODE_BUCKET_ID}"
 memoryLimit: 100
+order: 8
+category: D_2

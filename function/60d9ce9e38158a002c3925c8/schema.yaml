@@ -9,64 +9,21 @@ triggers:
       timezone: Europe/Istanbul
       frequency: 0 7 * * *
     type: schedule
-    active: true
+    active: false
   executeReportWeekly:
     options:
       timezone: Europe/Istanbul
       frequency: 5 7 * * 1
     type: schedule
-    active: true
+    active: false
   executeReportMonthly:
     options:
       timezone: Europe/Istanbul
       frequency: 5 7 1 * *
     type: schedule
-    active: true
-  executeReportDailyMan:
-    options:
-      method: Get
-      path: /executeReportDailyMan
-      preflight: true
-    type: http
-    active: false
-  executeReportMonthlyMan:
-    options:
-      method: Get
-      path: /executeReportMonthlyMan
-      preflight: true
-    type: http
-    active: false
-  matchChargeCountList:
-    options:
-      method: Get
-      path: /
-      preflight: true
-    type: http
-    active: true
-  executeReportWeeklyMan:
-    options:
-      method: Get
-      path: /executeReportWeeklyMan
-      preflight: true
-    type: http
     active: false
 env:
-  PAST_MATCHES_BUCKET_ID: "{PAST_MATCHES_BUCKET_ID}"
-  MATCH_REPORT_BUCKET_ID: "{MATCH_REPORT_BUCKET_ID}"
-  SECRET_API_KEY: "{SECRET_API_KEY}"
-  REWARD_LOGS_BUCKET_ID: "{REWARD_LOGS_BUCKET_ID}"
-  MAILER_BUCKET_ID: "{MAILER_BUCKET_ID}"
-  CHARGE_LOGS_BUCKET_ID: "{CHARGE_LOGS_BUCKET_ID}"
-  USER_BUCKET_ID: "{USER_BUCKET_ID}"
-  USER_REPORT_BUCKET_ID: "{USER_REPORT_BUCKET_ID}"
-  CHARGE_REPORT_BUCKET_ID: "{CHARGE_REPORT_BUCKET_ID}"
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
-  USERS_MATCH_REPORT_BUCKET_ID: "{USERS_MATCH_REPORT_BUCKET_ID}"
-  ANSWERS_TO_QUESTION_REPORT_BUCKET_ID: "{ANSWERS_TO_QUESTION_REPORT_BUCKET_ID}"
-  WIN_LOSE_MATCHES_BUCKET_ID: "{WIN_LOSE_MATCHES_BUCKET_ID}"
-  PLAY_COUNT_LOGS_BUCKET_ID: "{PLAY_COUNT_LOGS_BUCKET_ID}"
-  RETRY_REPORT_BUCKET_ID: "{RETRY_REPORT_BUCKET_ID}"
-  MANUALLY_REWARD_BUCKET_ID: "{MANUALLY_REWARD_BUCKET_ID}"
-  REWARD_REPORT_BUCKET_ID: "{REWARD_REPORT_BUCKET_ID}"
-  BUGGED_REWARD_BUCKET_ID: "{BUGGED_REWARD_BUCKET_ID}"
 memoryLimit: 100
+order: 10
+category: D_2

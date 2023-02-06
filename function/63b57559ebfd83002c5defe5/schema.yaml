@@ -1,14 +1,16 @@
-_id: 61c5e60902e67d002f7bbd7b
-name: List Dbs
+_id: 63b57559ebfd83002c5defe5
+name: Api
 language: javascript
-timeout: 90
+timeout: 53.7
 triggers:
   default:
     type: http
     active: true
     options:
       method: Get
-      path: /list-dbs
+      path: /
       preflight: true
 env: {}
 memoryLimit: 100
+order: 2
+category: Helpers

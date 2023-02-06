@@ -2,7 +2,7 @@ _id: 606c138f6b2647002c2fc497
 title: Matchmaking
 description: Matchmaking Ultra new desc
 icon: record_voice_over
-primary: min_elo
+primary: title
 readOnly: false
 history: false
 properties:
@@ -23,16 +23,10 @@ properties:
     options:
       position: bottom
     default: :created_at
-  min_elo:
-    type: number
-    title: min_elo
-    description: Description of the min_elo input
-    options:
-      position: bottom
-  max_elo:
-    type: number
-    title: max_elo
-    description: Description of the max_elo input
+  title:
+    type: string
+    title: title
+    description: Description of the title input
     options:
       position: bottom
 acl:
@@ -48,4 +42,5 @@ acl:
     auth.key == "e5wl18kmw287kr"
 required:
   - user
-order: 7
+order: 4
+category: DevOps

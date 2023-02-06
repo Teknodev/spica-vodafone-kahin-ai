@@ -9,7 +9,15 @@ triggers:
     options:
       timezone: UTC
       frequency: 0 * * * *
+  insertDataWithId:
+    options:
+      method: Post
+      path: /insertDataWithId
+      preflight: true
+    type: http
+    active: true
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
-  USER_BUCKET: "{USER_BUCKET}"
 memoryLimit: 100
+order: 3
+category: Helpers

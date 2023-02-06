@@ -1,0 +1,15 @@
+_id: 63b57e98ebfd83002c5df0c5
+name: Environment Variables
+language: javascript
+timeout: 18.8
+triggers:
+  default:
+    type: http
+    active: true
+    options:
+      method: Get
+      path: /
+      preflight: true
+env: {}
+memoryLimit: 100
+order: 18

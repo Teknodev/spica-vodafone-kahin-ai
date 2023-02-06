@@ -8,15 +8,11 @@ triggers:
   matchmaker:
     options:
       timezone: Europe/Istanbul
-      frequency: "* * * * *"
+      frequency: "*/5 * * * * *"
     type: schedule
     active: true
 env:
-  MATCHMAKING_BUCKET_ID: "{MATCHMAKING_BUCKET_ID}"
-  SECRET_API_KEY: "{SECRET_API_KEY}"
-  DUEL_BUCKET_ID: "{DUEL_BUCKET_ID}"
-  USER_BUCKET_ID: "{USER_BUCKET_ID}"
-  CONFIGURATION_BUCKET_ID: "{CONFIGURATION_BUCKET_ID}"
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
-  BOT_BUCKET_ID: "{BOT_BUCKET_ID}"
 memoryLimit: 100
+order: 12
+category: D_1

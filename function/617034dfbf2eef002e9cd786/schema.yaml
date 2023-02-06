@@ -8,8 +8,9 @@ triggers:
       collection: bucket_60ab7235c03a2d002eb2f574
       type: INSERT
     type: database
-    active: true
+    active: false
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
-  DRAW_LOGS_BUCKET: "{DRAW_LOGS_BUCKET}"
 memoryLimit: 100
+order: 15
+category: D_1
