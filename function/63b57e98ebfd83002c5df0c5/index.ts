@@ -1,5 +1,9 @@
 export const env = {
     USER_POLICY: "606328bfe9960e002c2781c7",
+    SECRET_API_KEY: "406bus18l2yiufdq",
+    PASSWORD_SALT: "a062b81f3ba54ba43babaacc5b267654",
+    MAIN_SERVER_URL: "https://bip-4islem-d6738.hq.spicaengine.com/api",
+    OPERATION_KEY: "6Ww7PajcsGH34PbE",
     BUCKET: {
         USER: "605c9480e9960e002c278191",
         DUEL: "605ca275e9960e002c2781a4",
@@ -27,12 +31,7 @@ export const env = {
         MAILER: "60bf26f4c48b36002dd87e01",
         CONTACT: "607808eba04c51002d25a007",
         CONFIGURATION: "6067935ee9960e002c27877f",
-        
-    },
-    FASTLOGIN: {
-        SECRET_KEY: "b79bbfdd-456e-4092-9cde-966db74dbae9",
-        SERVICE_ID: "101180",
-        PASSWORD_SALT: "a062b81f3ba54ba43babaacc5b267654"
+        SERVER_INFO: "63e21f14130d55002c19fe95"
     },
     MAILER: {
         SMTP_USER: "noreply@spicaengine.com",
@@ -43,14 +42,10 @@ export const env = {
     TCELL: {
         USERNAME: 400026758,
         PASSWORD: 400026758,
-        MT_VARIANT: 130524,
-        CHARGE_VARIANT: 132985,
-        CHARGE_OFFER_ID: 457412,
-        HOURLY_1GB_OFFER_ID: 455883,
-        DAILY_2GB_OFFER_ID: 455884,
-        HOURLY_CAMPAIGN_ID: 1236,
-        DAILY_1GB_OFFER_ID: 451318,
-        DAILY_CAMPAIGN_ID: "871137.947567.966243",
-        CHARGE_AMOUNT: "7 TL"
-    }
+        PRODUCT_DAILY: 261063,
+        OFFER_ID_1GB: 481642,
+        CAMPAIGN_ID: 1236,
+        VARIANT_ID: 130522,
+        CHARGE_AMOUNT: "5,99 TL"
+    },
 }

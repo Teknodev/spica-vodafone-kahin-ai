@@ -76,7 +76,6 @@ properties:
 acl:
   write: |-
     auth.attributes.role == "admin" ||
-    auth._id == "60f170fa29eb79002d0857e4" || 
     auth._id==document.user.identity
   read: true==true
 order: 23

@@ -1,9 +1,11 @@
+import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
+
 import * as Bucket from "@spica-devkit/bucket"
 import * as Identity from "@spica-devkit/identity";
 import { database, ObjectId } from "@spica-devkit/database";
 import axios from 'axios';
 
-const SECRET_API_KEY = "e5wl18kmw287kr";
+const SECRET_API_KEY = Environment.env.SECRET_API_KEY;
 let db;
 
 export function useBucket(initializeParams = { apikey: SECRET_API_KEY }) {
@@ -71,7 +73,7 @@ export async function getOne(bucketId, filter) {
 export async function getMany(bucketId, filter) {
     const db = await useDatabase();
     return db.collection(`bucket_${bucketId}`)
-        .findOne(filter)
+        .find(filter)
         .toArray()
         .catch(err => console.log("ERROR 1", err));
 }
@@ -101,5 +103,19 @@ export async function insertMany(bucketId, data) {
     const db = await useDatabase();
     return db.collection(`bucket_${bucketId}`)
         .insertMany(data)
+        .catch(err => console.log("ERROR 1", err));
+}
+
+export async function deleteOne(bucketId, filter) {
+    const db = await useDatabase();
+    return db.collection(`bucket_${bucketId}`)
+        .deleteOne(filter)
+        .catch(err => console.log("ERROR 1", err));
+}
+
+export async function deleteMany(bucketId, filter) {
+    const db = await useDatabase();
+    return db.collection(`bucket_${bucketId}`)
+        .deleteMany(filter)
         .catch(err => console.log("ERROR 1", err));
 }

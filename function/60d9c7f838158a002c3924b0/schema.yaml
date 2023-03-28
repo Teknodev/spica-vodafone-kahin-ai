@@ -5,14 +5,22 @@ description: This function gets every finished duel and left duels. Then close
 language: javascript
 timeout: 56.5
 triggers:
-  checkFinishedDuels:
+  insertPastMatchFromServer:
     options:
-      timezone: Europe/Istanbul
-      frequency: "*/10 * * * * *"
-    type: schedule
+      method: Post
+      path: /insertPastMatchFromServer
+      preflight: true
+    type: http
+    active: true
+  removeServerInfoExternal:
+    options:
+      method: Post
+      path: /removeServerInfoExternal
+      preflight: true
+    type: http
     active: true
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
-order: 13
+order: 12
 category: D_1

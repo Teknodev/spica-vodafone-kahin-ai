@@ -127,10 +127,3 @@ function createPassword(text) {
     let password = "a-" + text + "-a";
     return password;
 }
-
-export async function testTest123(req, res){
-    let tets = "60d9c65f38158a002c392492"
-    console.log(typeof tets)
-    console.log(typeof Api.toObjectId(tets))
-    return res.status(200).send({messgae: 'ok' })
-}

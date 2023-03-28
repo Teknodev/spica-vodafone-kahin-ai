@@ -2,14 +2,17 @@ import * as Api from "../../63b57559ebfd83002c5defe5/.build";
 import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
 
 const MATCHMAKING_BUCKET = Environment.env.BUCKET.MATCHMAKING;
-const DUEL_BUCKET = Environment.env.BUCKET.DUEL;
 const USER_BUCKET = Environment.env.BUCKET.USER;
 const BOT_BUCKET = Environment.env.BUCKET.BOT;
+const SERVER_INFO_BUCKET = Environment.env.BUCKET.SERVER_INFO;
+
+const MATCH_SERVERS = [
+    { title: 'bip-4islem-d6738', api_key: '406bus18l2yiufdq' },
+]
 
 export async function matchmaker() {
     const db = await Api.useDatabase();
     const matchmakingCollection = db.collection(`bucket_${MATCHMAKING_BUCKET}`);
-    const duelCollection = db.collection(`bucket_${DUEL_BUCKET}`);
     const userCollection = db.collection(`bucket_${USER_BUCKET}`);
     const botCollection = db.collection(`bucket_${BOT_BUCKET}`);
 
@@ -47,18 +50,14 @@ export async function matchmaker() {
         .toArray()
         .catch(err => console.log("ERROR 1", err));
 
-    let { matched_with_user, unmatched_with_user } = seperateMatchingsUsers([
+    let { matched_with_user, matched_with_bots } = seperateMatchingsUsers([
         ...match_making_users
-    ]);
-
-    let { matched_with_bots, unmatched_with_bots } = seperateMatchingWithBot([
-        ...unmatched_with_user
     ]);
 
     // 1 - add mathced users to ->> duel ->> delete from ->> matchmaking bucket
     let duels_with_user_array = createDuelObjectsWithUser([...matched_with_user]);
     if (duels_with_user_array.length > 0) {
-        await duelCollection.insertMany(duels_with_user_array);
+        checkAvailability(duels_with_user_array[0]);
     }
 
     let delete_match_with_user_filter = matchedWithUserDeleteFilter([...matched_with_user]);
@@ -78,23 +77,13 @@ export async function matchmaker() {
 
     let duels_with_bots_array = createDuelObjectsWithBot([...matched_with_bots], bot);
     if (duels_with_bots_array.length > 0) {
-        await duelCollection.insertMany(duels_with_bots_array);
+        checkAvailability(duels_with_bots_array[0]);
     }
 
     let delete_match_with_bot_filter = nonMatchedWithUserDeleteFilter([...matched_with_bots]);
     await matchmakingCollection.deleteMany(
         delete_match_with_bot_filter
     );
-
-    // 3- change (time and) elo of unmatched ->> delete these users from ->> matchmaking bucket ->> insert updated users to ->> matchmaking bucket
-
-    let delete_unmatch_with_bots_filter = nonMatchedWithUserDeleteFilter([
-        ...unmatched_with_bots
-    ]);
-
-    await matchmakingCollection.updateMany(delete_unmatch_with_bots_filter, {
-        $inc: { max_elo: 20, min_elo: -20 }
-    });
 }
 
 // DATA MANIPULATION FUNCTIONS
@@ -187,7 +176,6 @@ function seperateMatchingsUsers(matchmaking_users) {
     let matched = [];
     let unmatched = [];
 
-    // new method
     // --set matched
     for (let matchmaking_user1 of matchmaking_users) {
         // 1-if first user is matched
@@ -198,14 +186,11 @@ function seperateMatchingsUsers(matchmaking_users) {
                     !inMatched(matchmaking_user2, matched) &&
                     matchmaking_user1._id != matchmaking_user2._id
                 ) {
-                    if (canMatched(matchmaking_user1, matchmaking_user2)) {
-                        // 3-if both user not is matched
-                        if (
-                            !inMatched(matchmaking_user1, matched) &&
-                            !inMatched(matchmaking_user2, matched)
-                        ) {
-                            matched.push([matchmaking_user1, matchmaking_user2]);
-                        }
+                    if (
+                        !inMatched(matchmaking_user1, matched) &&
+                        !inMatched(matchmaking_user2, matched)
+                    ) {
+                        matched.push([matchmaking_user1, matchmaking_user2]);
                     }
                 }
             }
@@ -221,51 +206,8 @@ function seperateMatchingsUsers(matchmaking_users) {
 
     return {
         matched_with_user: matched,
-        unmatched_with_user: unmatched
+        matched_with_bots: unmatched
     };
-}
-
-function seperateMatchingWithBot(matchmaking_users) {
-    let matched_with_bots = [];
-    let unmatched_with_bots = [];
-
-    // use find
-
-    for (let matchmaking_user of matchmaking_users) {
-        let now = new Date();
-        let ending_time = new Date(matchmaking_user.date);
-
-        // time passed
-        if (ending_time < now) {
-            //add with bots array and remove from unmatched users
-            matched_with_bots.push(matchmaking_user);
-            // matchmaking_users = removeObject(matchmaking_user, matchmaking_users);
-        } else {
-            unmatched_with_bots.push(matchmaking_user);
-        }
-    }
-
-    return {
-        matched_with_bots: matched_with_bots,
-        unmatched_with_bots: unmatched_with_bots
-    };
-}
-
-function removeObject(object, array) {
-    let index = getIndexOfObject(object, array);
-    if (index != -1) array.splice(index, 1);
-
-    return array;
-}
-
-function getIndexOfObject(object, array) {
-    var index = array
-        .map(function (item) {
-            return item._id;
-        })
-        .indexOf(object._id);
-
-    return index;
 }
 
 //check user is in the already matched array or not
@@ -285,17 +227,68 @@ function inMatched(matchmaking_user, matched) {
     return response;
 }
 
-function canMatched(matchmaking_user1, matchmaking_user2) {
-    let response;
+// TODO
+let _counter = 0;
+async function checkAvailability(data) {
+    data["user1"] = String(data.user1);
+    data["user2"] = String(data.user2);
+    let users = [String(data.user1)];
 
-    if (
-        matchmaking_user1.min_elo <= matchmaking_user2.user.elo &&
-        matchmaking_user2.user.elo <= matchmaking_user1.max_elo
-    ) {
-        response = true;
-    } else {
-        response = false;
+    if (data.player_type == 0) {
+        users.push(String(data.user2));
     }
 
-    return response;
+    _counter++;
+
+    let _tempCounter = _counter;
+    let postData = {
+        data: data,
+        users: users,
+        code: _counter
+    };
+
+    let serverIndex = 0;
+    // if (_counter % 2 == 0) {
+    //     serverIndex = 1;
+    // }
+
+    let server = MATCH_SERVERS[serverIndex].title;
+    let api_key = MATCH_SERVERS[serverIndex].api_key;
+
+    let url = `https://${server}.hq.spicaengine.com/api/fn-execute/checkAvailability`;
+
+    const headers = {
+        Authorization: `APIKEY ${api_key}`,
+        "Content-Type": "application/json"
+    };
+
+    let serverRes;
+    try {
+        serverRes = await Api.httpRequest('post', url, postData, headers);
+    } catch (err) {
+        console.log(`AXIOS ERR: code: ${_tempCounter} ------`, server, 'ERR: ', err)
+        return;
+    }
+
+    if (serverRes && serverRes.status != 200) {
+        console.log("serverRes: ", serverRes)
+    }
+
+    if (serverRes && serverRes.data.tokens && serverRes.data.tokens[0]) {
+        let insertedObj = {
+            duel_id: serverRes.data.duel_id,
+            match_server: server,
+            user1: data["user1"],
+            user1_token: serverRes.data.tokens[0],
+            user2: data["user2"],
+            user2_token: serverRes.data.tokens[1] || "",
+            available_to_user_1: true,
+            available_to_user_2: true,
+            created_at: new Date(),
+            user1_ready: false,
+            user2_ready: serverRes.data.tokens[1] ? false : true
+        };
+
+        await Api.insertOne(SERVER_INFO_BUCKET, insertedObj)
+    }
 }

@@ -10,13 +10,6 @@ triggers:
       method: Post
       path: /playCountDecrease
       preflight: true
-  setReady:
-    options:
-      method: Post
-      path: /setReady
-      preflight: true
-    type: http
-    active: true
   changeAvatar:
     options:
       method: Post
@@ -24,17 +17,24 @@ triggers:
       preflight: true
     type: http
     active: true
-  addNewBots:
-    options:
-      method: Post
-      path: /addNewBots
-      preflight: true
-    type: http
-    active: true
   changeName:
     options:
       method: Post
       path: /changeName
+      preflight: true
+    type: http
+    active: true
+  setReadyMainServer:
+    options:
+      method: Post
+      path: /setReadyMainServer
+      preflight: true
+    type: http
+    active: true
+  serverInfoUpdate:
+    options:
+      method: Post
+      path: /serverInfoUpdate
       preflight: true
     type: http
     active: true

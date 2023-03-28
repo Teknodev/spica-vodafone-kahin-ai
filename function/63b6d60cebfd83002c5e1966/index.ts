@@ -162,6 +162,11 @@ export async function handleAwardResData(data, matchId, type) {
         return;
     }
 
+    if (!result) {
+        console.log("content", content["S:Envelope"]["S:Body"])
+        return;
+    }
+
     const status = result["line"]["lineItem"]["businessInteraction"];
     const rewardData = {
         order_id: parseInt(result["ns1:orderId"]["_text"]),

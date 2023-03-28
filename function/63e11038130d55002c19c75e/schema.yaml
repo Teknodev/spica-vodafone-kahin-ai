@@ -1,0 +1,22 @@
+_id: 63e11038130d55002c19c75e
+name: Check Availability
+language: javascript
+timeout: 51
+triggers:
+  checkAvailability:
+    options:
+      method: Post
+      path: /checkAvailability
+      preflight: true
+    type: http
+    active: true
+env:
+  DUEL_BUCKET: "{DUEL_BUCKET}"
+  CONFIGURATION_BUCKET: "{CONFIGURATION_BUCKET}"
+  PASSWORD_SALT: "{PASSWORD_SALT}"
+  USER_POLICY: "{USER_POLICY}"
+  SECRET_API_KEY: "{SECRET_API_KEY}"
+  NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
+memoryLimit: 100
+order: 18
+category: Server

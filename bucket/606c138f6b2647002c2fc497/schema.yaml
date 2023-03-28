@@ -33,13 +33,11 @@ acl:
   write: |-
     auth._id == document.user.identity ||
     auth.attributes.role == "admin" ||
-    auth._id == "60f170fa29eb79002d0857e4" || 
-    auth.key == "e5wl18kmw287kr"
+    auth.key == "406bus18l2yiufdq"
   read: |-
     auth._id == document.user.identity ||
     auth.attributes.role == "admin" ||
-    auth._id == "60f170fa29eb79002d0857e4" || 
-    auth.key == "e5wl18kmw287kr"
+    auth.key == "406bus18l2yiufdq"
 required:
   - user
 order: 4

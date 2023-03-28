@@ -18,13 +18,6 @@ triggers:
       preflight: true
     type: http
     active: true
-  testTest123:
-    options:
-      method: Get
-      path: /testTest123
-      preflight: true
-    type: http
-    active: true
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100

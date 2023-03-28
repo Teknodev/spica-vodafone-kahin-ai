@@ -1,0 +1,28 @@
+_id: 63e3b6b0130d55002c1a26d8
+name: Marketing Services
+language: javascript
+timeout: 54.8
+triggers:
+  onInsertedMatch:
+    options:
+      collection: bucket_60742ed3f95e39002c4917ae
+      type: INSERT
+    type: database
+    active: true
+  onChargeUpdated:
+    options:
+      collection: bucket_60ab7235c03a2d002eb2f574
+      type: UPDATE
+    type: database
+    active: true
+  sendManuallyData:
+    options:
+      method: Get
+      path: /sendManuallyData
+      preflight: true
+    type: http
+    active: true
+env:
+  NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
+memoryLimit: 100
+order: 24

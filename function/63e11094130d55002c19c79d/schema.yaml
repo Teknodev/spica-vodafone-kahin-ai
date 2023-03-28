@@ -1,0 +1,17 @@
+_id: 63e11094130d55002c19c79d
+name: Server Check Finished Duels
+language: javascript
+timeout: 6.3
+triggers:
+  checkFinishedDuels:
+    type: schedule
+    active: true
+    options:
+      timezone: UTC
+      frequency: "*/10 * * * * *"
+env:
+  NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
+  DUEL_BUCKET: "{DUEL_BUCKET}"
+memoryLimit: 100
+order: 19
+category: Server

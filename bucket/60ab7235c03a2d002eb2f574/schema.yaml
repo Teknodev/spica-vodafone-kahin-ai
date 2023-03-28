@@ -2,14 +2,20 @@ _id: 60ab7235c03a2d002eb2f574
 title: Charge Logs
 description: Describe your new bucket
 icon: line_style
-primary: msisdn
+primary: transaction_id
 readOnly: false
 history: false
 properties:
-  order_id:
-    type: number
-    title: order_id
-    description: Description of the order_id input
+  transaction_id:
+    type: string
+    title: transaction_id
+    description: Description of the transaction_id input
+    options:
+      position: bottom
+  commit_token:
+    type: string
+    title: commit_token
+    description: Description of the commit_token input
     options:
       position: bottom
   msisdn:
@@ -18,20 +24,36 @@ properties:
     description: Description of the msisdn input
     options:
       position: bottom
-      index: true
-  user_text:
-    type: string
-    title: user_text
-    description: Description of the user_text input
-    options:
-      position: bottom
   date:
     type: date
     title: date
     description: Description of the date input
     options:
       position: bottom
-      index: true
+  listener_result:
+    type: string
+    title: listener_result
+    description: Description of the listener_result input
+    options:
+      position: bottom
+  commit_result:
+    type: string
+    title: commit_result
+    description: Description of the commit_result input
+    options:
+      position: bottom
+  result:
+    type: string
+    title: result
+    description: Description of the result input
+    options:
+      position: bottom
+  identity:
+    type: string
+    title: identity
+    description: Description of the identity input
+    options:
+      position: bottom
   status:
     type: boolean
     title: status
@@ -39,12 +61,31 @@ properties:
     options:
       position: bottom
     default: false
-  result:
-    type: textarea
-    title: result
-    description: Description of the result input
+  user_text:
+    type: string
+    title: user_text
+    description: Description of the user_text input
     options:
       position: bottom
+  user_action_date:
+    type: date
+    title: user_action_date
+    description: Description of the user_action_date input
+    options:
+      position: bottom
+  item_id:
+    type: number
+    title: item_id
+    description: Description of the item_id input
+    options:
+      position: bottom
+  is_success:
+    type: boolean
+    title: is_success
+    description: Description of the is_success input
+    options:
+      position: bottom
+    default: false
 acl:
   write: true==true
   read: true==true

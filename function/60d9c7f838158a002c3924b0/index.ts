@@ -1,201 +1,112 @@
 import * as Api from "../../63b57559ebfd83002c5defe5/.build";
 import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
+import * as User from "../../63b6a403ebfd83002c5e104e/.build";
 
-const DUEL_BUCKET = Environment.env.BUCKET.DUEL;
 const PAST_MATCH_BUCKET = Environment.env.BUCKET.PAST_MATCH;
-const USER_BUCKET = Environment.env.BUCKET.USER;
+const SERVER_INFO_BUCKET = Environment.env.BUCKET.SERVER_INFO;
 
-export async function checkFinishedDuels() {
-    const db = await Api.useDatabase();
-    const usersCollection = db.collection(`bucket_${USER_BUCKET}`);
+const OPERATION_KEY = Environment.env.OPERATION_KEY;
 
-    const t = new Date();
-    t.setSeconds(t.getSeconds() - 130);
+export async function insertPastMatchFromServer(req, res) {
+    const { duel, key } = req.body;
 
-    const finishedDuels = await db
-        .collection(`bucket_${DUEL_BUCKET}`)
-        .aggregate([
-            {
-                $match: {
-                    $and: [{ created_at: { $exists: true } }, { created_at: { $lt: t } }]
-                }
-            },
-            {
-                $set: {
-                    _id: {
-                        $toString: "$_id"
-                    },
-                    user1: {
-                        $toObjectId: "$user1"
-                    },
-                    user2: {
-                        $toObjectId: "$user2"
-                    }
-                }
-            },
-            {
-                $lookup: {
-                    from: `bucket_${USER_BUCKET}`,
-                    localField: "user1",
-                    foreignField: "_id",
-                    as: "user1"
-                }
-            },
-            {
-                $unwind: { path: "$user1", preserveNullAndEmptyArrays: true }
-            },
-            {
-                $lookup: {
-                    from: `bucket_${USER_BUCKET}`,
-                    localField: "user2",
-                    foreignField: "_id",
-                    as: "user2"
-                }
-            },
-            {
-                $unwind: { path: "$user2", preserveNullAndEmptyArrays: true }
-            },
-            {
-                $set: {
-                    "user1._id": {
-                        $toString: "$user1._id"
-                    },
-                    "user2._id": {
-                        $toString: "$user2._id"
-                    }
-                }
-            }
-        ])
-        .toArray()
-        .catch(console.error);
-
-    if (finishedDuels) {
-        for (let duel of finishedDuels) {
-            let duelId = duel._id.toString();
-
-            const pastDuel = await db
-                .collection(`bucket_${PAST_MATCH_BUCKET}`)
-                .find({ duel_id: duelId })
-                .toArray();
-
-
-            if (!pastDuel.length && duel.winner == 0) {
-                let user1EarnedAward = 0;
-                let user2EarnedAward = 0;
-
-                // if both are winner
-                if (duel.user1_points == duel.user2_points) {
-                    duel.winner = 3;
-                    duel.user1_points += 100;
-                    duel.user2_points += 100;
-
-                    duel.user1.win_count += 1;
-                    user1EarnedAward += duel.user1_is_free ? 1 : 2;
-                    duel.user1.elo += 25;
-
-                    if (!duel.user2.bot) {
-                        user2EarnedAward += duel.user2_is_free ? 1 : 2;
-                        duel.user2.win_count += 1;
-                        duel.user2.elo += 25;
-                    }
-                }
-                // if just user1 is winner
-                else if (duel.user1_points > duel.user2_points) {
-                    duel.winner = 1;
-                    duel.user1_points += 100;
-                    duel.user1.win_count += 1;
-                    user1EarnedAward += duel.user1_is_free ? 1 : 2;
-                    duel.user1.elo += 25;
-                    if (!duel.user2.bot) {
-                        user2EarnedAward += duel.user2_is_free ? 0 : 1;
-                        duel.user2.lose_count += 1;
-                        duel.user2.elo = Math.max(duel.user2.elo - 25, 0);
-                    }
-                }
-                // if just user2 is winner
-                else if (duel.user1_points < duel.user2_points) {
-                    duel.winner = 2;
-                    duel.user2_points += 100;
-
-                    if (!duel.user2.bot) {
-                        duel.user2.win_count += 1;
-                        user2EarnedAward += duel.user2_is_free ? 1 : 2;
-                        duel.user2.elo += 25;
-                    }
-                    duel.user1.lose_count += 1;
-                    user1EarnedAward += duel.user1_is_free ? 0 : 1;
-                    duel.user1.elo = Math.max(duel.user1.elo - 25, 0);
-                }
-
-                await db
-                    .collection(`bucket_${PAST_MATCH_BUCKET}`)
-                    .insertOne({
-                        name: duel.user1.name + " vs " + duel.user2.name,
-                        user1: duel.user1._id,
-                        user2: duel.user2._id,
-                        winner: duel.winner,
-                        user1_answers: duel.user1_answers,
-                        user2_answers: duel.user2_answers,
-                        user1_points: duel.user1_points,
-                        user2_points: duel.user2_points,
-                        start_time: duel.created_at,
-                        end_time: new Date(),
-                        player_type: duel.player_type,
-                        points_earned: duel.user1_points + duel.user2_points,
-                        user1_is_free: duel.user1_is_free,
-                        user2_is_free: duel.user2_is_free,
-                        duel_id: duelId
-                    })
-                    .catch(err => console.log("ERROR 5", err));
-
-                // Update users point --->
-                await usersCollection
-                    .findOneAndUpdate(
-                        {
-                            _id: Api.toObjectId(duel.user1._id)
-                        },
-                        {
-                            $set: {
-                                total_point: parseInt(duel.user1.total_point) + duel.user1_points,
-                                weekly_point: duel.user1.weekly_point + duel.user1_points,
-                                win_count: duel.user1.win_count,
-                                lose_count: duel.user1.lose_count,
-                                total_award: parseInt(duel.user1.total_award) + user1EarnedAward,
-                                weekly_award: (duel.user1.weekly_award || 0) + user1EarnedAward,
-                                elo: duel.user1.elo
-                            }
-                        }
-                    )
-                    .catch(err => console.log("ERROR 3", err));
-
-                await usersCollection
-                    .findOneAndUpdate(
-                        {
-                            _id: Api.toObjectId(duel.user2._id)
-                        },
-                        {
-                            $set: {
-                                total_point: parseInt(duel.user2.total_point) + duel.user2_points,
-                                weekly_point: duel.user2.weekly_point + duel.user2_points,
-                                win_count: duel.user2.win_count,
-                                lose_count: duel.user2.lose_count,
-                                total_award: parseInt(duel.user2.total_award) + user2EarnedAward,
-                                weekly_award: (duel.user2.weekly_award || 0) + user2EarnedAward,
-                                elo: duel.user2.elo
-                            }
-                        }
-                    )
-                    .catch(err => console.log("ERROR 4", err));
-                // Update users point end <---
-            }
-
-            await db
-                .collection(`bucket_${DUEL_BUCKET}`)
-                .deleteOne({
-                    _id: Api.toObjectId(duelId)
-                })
-                .then(data => { })
-                .catch(err => console.log("error while deleteOne _id: ObjectId(duelId)", err));
-        }
+    if (key != OPERATION_KEY) {
+        return res.status(400).send({ message: "No access" });
     }
+
+    removeServerInfo(duel._id);
+
+    const user1 = await User.getOne({ _id: Api.toObjectId(duel.user1) })
+    const user2 = await User.getOne({ _id: Api.toObjectId(duel.user2) })
+
+    let user1EarnedAward = 0;
+    let user2EarnedAward = 0;
+
+    if (duel.user1_points == duel.user2_points) {
+        duel.winner = 3;
+        duel.user1_points += 100;
+        duel.user2_points += 100;
+        user1.win_count += 1;
+        user1EarnedAward += duel.user1_is_free ? 1 : 2;
+
+        if (!user2.bot) {
+            user2EarnedAward += duel.user2_is_free ? 1 : 2;
+            user2.win_count += 1;
+        }
+    } else if (duel.user1_points > duel.user2_points) {
+        duel.winner = 1;
+        duel.user1_points += 100;
+        user1.win_count += 1;
+        user1EarnedAward += duel.user1_is_free ? 1 : 2;
+
+        if (!user2.bot) {
+            user2EarnedAward += duel.user2_is_free ? 0 : 1;
+            user2.lose_count += 1;
+        }
+    } else if (duel.user1_points < duel.user2_points) {
+        duel.winner = 2;
+        duel.user2_points += 100;
+        if (!user2.bot) {
+            user2.win_count += 1;
+            user2EarnedAward += duel.user2_is_free ? 1 : 2;
+        }
+        user1.lose_count += 1;
+        user1EarnedAward += duel.user1_is_free ? 0 : 1;
+    }
+
+    await Api.insertOne(PAST_MATCH_BUCKET, {
+        duel_id: duel.duel_id,
+        name: user1.name + " vs " + user2.name,
+        user1: duel.user1,
+        user2: duel.user2,
+        winner: duel.winner,
+        user1_answers: duel.user1_answers,
+        user2_answers: duel.user2_answers,
+        user1_points: duel.user1_points,
+        user2_points: duel.user2_points,
+
+        start_time: Api.toObjectId(duel._id).getTimestamp(),
+        end_time: new Date(),
+        player_type: duel.player_type,
+        points_earned: duel.user1_points + duel.user2_points,
+        user1_is_free: duel.user1_is_free,
+        user2_is_free: duel.user2_is_free,
+    })
+
+    User.updateOne({ _id: Api.toObjectId(duel.user1) }, {
+        $set: {
+            total_point: parseInt(user1.total_point) + duel.user1_points,
+            weekly_point: user1.weekly_point + duel.user1_points,
+            win_count: user1.win_count,
+            lose_count: user1.lose_count,
+            total_award: parseInt(user1.total_award) + user1EarnedAward,
+            weekly_award: (user1.weekly_award || 0) + user1EarnedAward,
+        }
+    })
+
+    User.updateOne({ _id: Api.toObjectId(duel.user2) }, {
+        $set: {
+            total_point: parseInt(user2.total_point) + duel.user2_points,
+            weekly_point: user2.weekly_point + duel.user2_points,
+            win_count: user2.win_count,
+            lose_count: user2.lose_count,
+            total_award: parseInt(user2.total_award) + user2EarnedAward,
+            weekly_award: (user2.weekly_award || 0) + user2EarnedAward,
+        }
+    })
+
+    return res.status(200).send({ message: "successful" });
+}
+
+export async function removeServerInfoExternal(req, res) {
+    const { duel, key } = req.body;
+
+    if (key != OPERATION_KEY) {
+        return res.status(400).send({ message: "No access" });
+    }
+    removeServerInfo(String(duel._id));
+}
+
+async function removeServerInfo(duel_id) {
+    Api.deleteOne(SERVER_INFO_BUCKET, { duel_id: duel_id })
 }

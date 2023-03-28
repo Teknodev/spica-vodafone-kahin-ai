@@ -4,20 +4,6 @@ description: Adds new available play for the user
 language: javascript
 timeout: 60
 triggers:
-  addAvailablePlayReq:
-    options:
-      method: Post
-      path: /add-available-play
-      preflight: true
-    type: http
-    active: true
-  checkSMSCode:
-    options:
-      method: Post
-      path: /checkSMSCode
-      preflight: true
-    type: http
-    active: true
   getWinner:
     options:
       collection: bucket_60742ed3f95e39002c4917ae
@@ -30,8 +16,21 @@ triggers:
       type: INSERT
     type: bucket
     active: true
+  chargeRequest:
+    options:
+      method: Get
+      path: /chargeRequest
+      preflight: true
+    type: http
+    active: true
+  transactionListener:
+    options:
+      method: Post
+      path: /transactionListener
+      preflight: true
+    type: http
+    active: true
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
-order: 11
-category: D_2
+order: 20

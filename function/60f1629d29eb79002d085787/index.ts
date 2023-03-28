@@ -723,12 +723,6 @@ export async function getManuallyRewardDashboard(req, res) {
             "Tek seferde hem saatlik hemde günlük yükleyebilirsiniz.",
         inputs: [
             {
-                key: "hourly",
-                type: "string",
-                value: "",
-                title: "Hourly Reward MSISDNS"
-            },
-            {
                 key: "daily",
                 type: "string",
                 value: "",
@@ -760,24 +754,9 @@ export async function dashboardManuallyReward(req, res) {
     }
 
     const Bucket = Api.useBucket();
-    let hourlyMsisdns = req.query.hourly;
     let dailyMsisdns = req.query.daily;
-    hourlyMsisdns = hourlyMsisdns ? hourlyMsisdns.split(",") : [];
     dailyMsisdns = dailyMsisdns ? dailyMsisdns.split(",") : [];
 
-    if (hourlyMsisdns[0]) {
-        console.log("Hourly Reward Msisdn: ", hourlyMsisdns[0])
-        for (let msisdn of hourlyMsisdns) {
-            await Bucket.data
-                .insert(MANUALLY_REWARD_BUCKET, {
-                    msisdn: Number(msisdn),
-                    reward: "hourly_1"
-                })
-                .catch(error => {
-                    console.log("ERROR 14", error);
-                });
-        }
-    }
     if (dailyMsisdns[0]) {
         console.log("Daily Reward Msisdn: ", dailyMsisdns[0])
         for (let msisdn of dailyMsisdns) {

@@ -4,31 +4,24 @@ description: Login & Register with using fastlogin system of Turkcell
 language: javascript
 timeout: 62
 triggers:
-  login:
+  fastLogin:
     options:
       method: Post
       path: /fastLogin
       preflight: true
     type: http
     active: true
-  register:
+  fastRegister:
     options:
       method: Post
       path: /fastRegister
       preflight: true
     type: http
     active: true
-  changePassword:
+  fastUserUpdate:
     options:
-      method: Get
-      path: /changePassword
-      preflight: true
-    type: http
-    active: true
-  getMyIp:
-    options:
-      method: Get
-      path: /getMyIp
+      method: Post
+      path: /fastUserUpdate
       preflight: true
     type: http
     active: true

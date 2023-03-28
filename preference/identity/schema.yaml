@@ -10,3 +10,13 @@ attributes:
       title: role
       description: Description of 'role'
       options: {}
+    user_id:
+      type: string
+      title: User_id
+      description: Description of 'User_id'
+      options: {}
+    duel_id:
+      type: string
+      title: Duel_id
+      description: Description of 'Duel_id'
+      options: {}

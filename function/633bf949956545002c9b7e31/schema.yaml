@@ -16,6 +16,20 @@ triggers:
       preflight: true
     type: http
     active: true
+  getAbusiveNames:
+    options:
+      method: Get
+      path: /getAbusiveNames
+      preflight: true
+    type: http
+    active: true
+  getMyIp:
+    options:
+      method: Get
+      path: /getMyIp
+      preflight: true
+    type: http
+    active: true
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
