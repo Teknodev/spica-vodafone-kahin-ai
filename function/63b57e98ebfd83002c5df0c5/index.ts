@@ -42,10 +42,10 @@ export const env = {
     TCELL: {
         USERNAME: 400026758,
         PASSWORD: 400026758,
-        PRODUCT_DAILY: 261063,
+        PRODUCT_DAILY: 261659,
         OFFER_ID_1GB: 481642,
         CAMPAIGN_ID: 1236,
         VARIANT_ID: 130522,
-        CHARGE_AMOUNT: "5,99 TL"
+        CHARGE_AMOUNT: "15 TL"
     },
 }

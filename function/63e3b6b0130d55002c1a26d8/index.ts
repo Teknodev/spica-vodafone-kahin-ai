@@ -7,8 +7,8 @@ import fetch from 'node-fetch';
 const PAST_MATCHES_BUCKET = Environment.env.PAST_MATCHES;
 const CHARGE_LOGS_BUCKET = Environment.env.CHARGE_LOGS;
 
-const CHARGE_AMOUNT = "5.99";
-const CHARGE_PRODUCT = "261063";
+const CHARGE_AMOUNT = "15";
+const CHARGE_PRODUCT = "261659";
 
 export async function onInsertedMatch(changed) {
     const document = changed.document;
@@ -29,10 +29,10 @@ export async function onInsertedMatch(changed) {
             "chargedAmount": "",
             "chargedProduct": ""
         }
-        // const response = await sendMarketingServiceData(bodyData);
-        // if (!response || response.body != 'Success') {
-        //     isSuccess = false;
-        // }
+        const response = await sendMarketingServiceData(bodyData);
+        if (!response || response.body != 'Success') {
+            isSuccess = false;
+        }
     }
 
     if (isSuccess) {
@@ -59,11 +59,11 @@ export async function onChargeUpdated(changed) {
         "chargedAmount": CHARGE_AMOUNT,
         "chargedProduct": CHARGE_PRODUCT
     }
-
-    // const response = await sendMarketingServiceData(bodyData);
-    // if (!response || response.body != 'Success') {
-    //     isSuccess = false;
-    // }
+    
+    const response = await sendMarketingServiceData(bodyData);
+    if (!response || response.body != 'Success') {
+        isSuccess = false;
+    }
 
     if (isSuccess) {
         const Bucket = Api.useBucket();

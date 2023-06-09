@@ -38,13 +38,15 @@ export async function checkFinishedDuels() {
                 user1: duel.user1,
                 user2: duel.user2,
                 winner: duel.winner,
+                user1_answers: duel.user1_answers,
+                user2_answers: duel.user2_answers,
                 user1_points: duel.user1_points,
                 user2_points: duel.user2_points,
                 start_time: ObjectId(duelId).getTimestamp(),
                 end_time: new Date(),
                 user1_is_free: duel.user1_is_free,
                 user2_is_free: duel.user2_is_free,
-                duel_type: duel.duel_type,
+                player_type: duel.player_type,
             }
 
             if (duel.winner == 0) {

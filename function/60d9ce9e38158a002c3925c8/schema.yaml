@@ -2,28 +2,27 @@ _id: 60d9ce9e38158a002c3925c8
 name: Report
 description: Report
 language: javascript
-timeout: 587.2
+timeout: 297.5
 triggers:
   executeReportDaily:
     options:
       timezone: Europe/Istanbul
       frequency: 0 7 * * *
     type: schedule
-    active: false
+    active: true
   executeReportWeekly:
     options:
       timezone: Europe/Istanbul
       frequency: 5 7 * * 1
     type: schedule
-    active: false
+    active: true
   executeReportMonthly:
     options:
       timezone: Europe/Istanbul
       frequency: 5 7 1 * *
     type: schedule
-    active: false
+    active: true
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
-order: 10
-category: D_2
+order: 21

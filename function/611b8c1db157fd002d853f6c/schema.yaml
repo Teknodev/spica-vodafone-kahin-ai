@@ -41,5 +41,4 @@ triggers:
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
-order: 7
-category: D_2
+order: 17

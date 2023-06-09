@@ -12,3 +12,4 @@ triggers:
       preflight: true
 env: {}
 memoryLimit: 100
+order: 25

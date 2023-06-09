@@ -64,8 +64,7 @@ export async function insertPastMatchFromServer(req, res) {
         user2_answers: duel.user2_answers,
         user1_points: duel.user1_points,
         user2_points: duel.user2_points,
-
-        start_time: Api.toObjectId(duel._id).getTimestamp(),
+        start_time: duel.start_time,
         end_time: new Date(),
         player_type: duel.player_type,
         points_earned: duel.user1_points + duel.user2_points,

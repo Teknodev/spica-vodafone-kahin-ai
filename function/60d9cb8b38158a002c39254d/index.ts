@@ -96,7 +96,7 @@ export async function fastRegister(req, res) {
         lose_count: 0,
         total_award: 0,
         weekly_award: 0,
-        available_play_count: 50,
+        available_play_count: 0,
         bot: false,
         perm_accept: false,
         free_play: false

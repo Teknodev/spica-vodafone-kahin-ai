@@ -18,7 +18,7 @@ const RETRY_REPORT_BUCKET = Environment.env.BUCKET.RETRY_REPORT;
 const REWARD_REPORT_BUCKET = Environment.env.BUCKET.REWARD_REPORT;
 const BUGGED_REWARD_BUCKET = Environment.env.BUCKET.BUGGED_REWARD;
 
-const DAILY_1GB_OFFER_ID = Environment.env.TCELL.DAILY_1GB_OFFER_ID;
+const OFFER_ID_1GB = Environment.env.TCELL.OFFER_ID_1GB;
 const CHARGE_AMOUNT = Environment.env.TCELL.CHARGE_AMOUNT;
 
 export async function executeReportDaily() {
@@ -145,14 +145,13 @@ export async function matchReport(reportType, dateFrom, dateTo) {
         p2mMatchPointsEarned += match.points_earned;
     });
 
-    const rewardDaily = await Api.getCount(REWARD_LOG_BUCKET, {
-        offer_id: DAILY_1GB_OFFER_ID,
+    const rewardDaily = await Api.getMany(REWARD_LOG_BUCKET, {
+        offer_id: OFFER_ID_1GB,
         date: {
             $gte: dateFrom,
             $lt: dateTo
         }
     })
-
     const rewardDailyTrue = rewardDaily.filter(el => el.status)
     const rewardDailyFalse = rewardDaily.filter(el => !el.status)
     const rewardDailyMatchTrue = rewardDailyTrue.filter(el => el.type == 'match')
@@ -164,10 +163,10 @@ export async function matchReport(reportType, dateFrom, dateTo) {
         p2p_play_points_earned: p2pMatchPointsEarned,
         p2m_play: p2mMatches.length,
         p2m_play_points_earned: p2mMatchPointsEarned,
-        daily_match_reward: rewardDailyMatchTrue,
-        daily_charge_reward: rewardDailyChargeTrue,
-        daily_reward_true: rewardDailyTrue,
-        daily_reward_false: rewardDailyFalse,
+        daily_match_reward: rewardDailyMatchTrue.length,
+        daily_charge_reward: rewardDailyChargeTrue.length,
+        daily_reward_true: rewardDailyTrue.length,
+        daily_reward_false: rewardDailyFalse.length,
         daily_reward_earned: daily_reward_earned,
         report_type: reportType
     })
@@ -199,13 +198,9 @@ export async function chargeReportExport(reportType, dateFrom, dateTo) {
     let totalQuantity = chargesSuccessful.length;
 
     const errorsMsgArr = [
-        "Devam eden diğer işlemlerden dolayı GNC Oyun aboneliği gerçekleştirilememektedir.",
-        "Abone kredisi(bakiyesi) yetersiz.",
-        "Abone bulunamadi.",
-        "Abone kara listede islem yapilamaz.",
-        "Hattiniz Katma Degerli Servis aboneligine kapali oldugu icin GNC Oyun servisine abonelik talebiniz gerceklestirilememistir. Abonelik izninizi 532?yi arayarak actirabilirsiniz.",
-        "Rahat Hatlar bu servisten yararlanamazlar.",
-        "Sistemlerde oluşan hata sebebi ile işleminiz yapılamıyor. İşleminiz tekrar denenmek üzere kuyruğa atılmıştır.",
+        "CONSENT_DENIED",
+        "F01, DIAMETER_END_USER_SERVICE_DENIED",
+        "F01, SUBSCRIBER_NOT_FOUND",
     ]
 
     const errors = await Api.getMany(CHARGE_LOG_BUCKET, {
@@ -223,6 +218,13 @@ export async function chargeReportExport(reportType, dateFrom, dateTo) {
         })
         totalQuantity += temptArr.length;
     })
+
+    const existsFalse = await Api.getMany(CHARGE_LOG_BUCKET, {
+        date: { $gte: dateFrom, $lt: dateTo },
+        status: false,
+        user_text: { "$exists": false }
+    })
+    totalQuantity += existsFalse.length;
 
     const data = [
         {
@@ -248,6 +250,17 @@ export async function chargeReportExport(reportType, dateFrom, dateTo) {
             error: err.msg,
             report_type: reportType
         })
+    })
+
+    data.push({
+        date: new Date(reportDate),
+        charge_amount: CHARGE_AMOUNT,
+        quantity: existsFalse.length,
+        ratio: existsFalse.length ? Number(((existsFalse.length / totalQuantity) * 100).toFixed(2)) : 0,
+        status: "Başarısız",
+        play_count: "-",
+        error: "Onay ve Red butonlara basmayan kullanıcılar",
+        report_type: reportType
     })
 
     await Api.insertMany(CHARGE_REPORT_BUCKET, data)
@@ -440,7 +453,7 @@ async function matchWinLoseCount(reportType, dateFrom, dateTo) {
         ]
     })
 
-    const paidLose = await Api.getCountByFilter(PAST_MATCH_BUCKET, {
+    const paidEqual = await Api.getCountByFilter(PAST_MATCH_BUCKET, {
         ...endTimeFilter,
         $or: [
             { user1_is_free: false, winner: 3 },
@@ -557,10 +570,32 @@ export async function reportExportSend(title, reportType) {
             template: "report-mail",
             variables: `{"title": "${title}"}`,
             emails: [
-                "idriskaribov@gmail.com"
+                "pinar.koca@turkcell.com.tr",
+                "ozkan.hakan@turkcell.com.tr",
+                "serdar@polyhagency.com",
+                "idriskaribov@gmail.com",
             ],
             report_type: reportType
         })
         .catch(err => console.log("ERROR: 35", err));
     return true;
+}
+
+export async function executeReportDailyMan(req, res) {
+    let date = new Date().setDate(new Date().getDate() - 1)
+    let dateFrom = new Date(date).setHours(0, 0, 0);
+    let dateTo = new Date(date).setHours(23, 59, 59);
+
+    // await questionReport(0, dateFrom, dateTo).catch(err => console.log("ERROR: 1", err));
+    // await userReport(0, dateFrom, dateTo).catch(err => console.log("ERROR: 4", err));
+    // await playedMatchCount(0, dateFrom, dateTo).catch(err => console.log("ERROR: 49", err));
+    // await matchReport(0, dateFrom, dateTo).catch(err => console.log("ERROR: 2", err));
+    // await matchWinLoseCount(0, dateFrom, dateTo).catch(err => console.log("ERROR: 55", err));
+    // await chargeReportExport(0, dateFrom, dateTo).catch(err => console.log("ERROR: 3", err));
+    // await retryReport(0, dateFrom, dateTo).catch(err => console.log("ERROR: ", err));
+    // await getFailedRewards(0, dateFrom, dateTo).catch(err => console.log("ERROR: ", err));
+
+    // await reportExportSend("Günlük Rapor", 0).catch(err => console.log("ERROR: 5", err));
+
+    return res.status(200).send({ message: 'Ok' });
 }

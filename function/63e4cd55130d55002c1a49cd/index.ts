@@ -24,17 +24,17 @@ export function sendMessageInChat(type, msisdn, message, expire) {
 			}
 
 			reqBody["composition"]["list"][0]["singletmm"] = {
-				"title": "Retro Yılan",
-				"description": "Oyun hakkın mevcut, oynamak için tıkla! Maçı kazanırsan avantajlı fiyattan 1 GB alma hakkı kazanacaksın",
+				"title": "4 İşlem Bol GB",
+				"description": "Oyun hakkın mevcut, oynamak için tıkla! Rakibini yenersen 1 GB daha kazanırsın!",
 				"image": {
-					"url": "https://timsac.bip.com/scontent/p2p/08112022/16/P654b5a8c001a39dea1e0afc223fe00bd1c479f24c241794a5568a98e0c060f7d3302.png",
+					"url": "https://timsac.bip.com/scontent/v2p/bu12005116347493965/17052023/10/P20329dd100db7e529fca0d64ec9f5bb824b4204583e3737bfeb69cf5c854858f3321.jpg",
 					"ratio": 1.0,
 				},
 				"buttonlist": [
 					{
 						"type": 0,
 						"name": "OYNA",
-						"url": `https://retroyilan.com/onboard?no=${msisdn}`
+						"url": `https://bip4islembolgb.com/onboard?no=${msisdn}`
 					}
 				]
 			}
@@ -55,7 +55,7 @@ export function sendMessageInChat(type, msisdn, message, expire) {
 					{
 						"type": 0,
 						"name": "Tekrar Oyna",
-						"url": `https://retroyilan.com/onboard?no=${msisdn}`
+						"url": `https://bip4islembolgb.com/onboard?no=${msisdn}`
 					}
 				]
 			}

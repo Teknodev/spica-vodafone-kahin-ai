@@ -16,6 +16,7 @@ const WIN_LOSE_MATCH_BUCKET = Environment.env.BUCKET.WIN_LOSE_MATCH;
 const ANSWER_TO_QUESTION_REPORT_BUCKET = Environment.env.BUCKET.ANSWER_TO_QUESTION_REPORT;
 const RETRY_REPORT_BUCKET = Environment.env.BUCKET.RETRY_REPORT;
 const REWARD_REPORT_BUCKET = Environment.env.BUCKET.REWARD_REPORT;
+const REWARD_MAILER = Environment.env.BUCKET.MAILER;
 
 /*
     REPORT TYPES: 
@@ -28,7 +29,7 @@ const REWARD_REPORT_BUCKET = Environment.env.BUCKET.REWARD_REPORT;
 
 export default async function (change) {
     let buckets = {
-        templates: process.env.TEMPLATES_BUCKET_ID
+        templates: REWARD_MAILER
     };
 
     const Bucket = Api.useBucket();
@@ -43,7 +44,7 @@ export default async function (change) {
     let variables = JSON.parse(change.current.variables);
     let emails = change.current.emails;
     let reportType = change.current.report_type;
-
+    
     const html = await getData(reportType).catch(err => console.log("ERROR 9", err));
 
     // for (const [key, value] of Object.entries(variables)) {
@@ -72,7 +73,7 @@ function _sendEmail(variables, email, subject, html) {
         var mailOptions = {
             from: mailFrom,
             to: email,
-            subject: subject,
+            subject: 'BiP 4Islem Report',
             html:
                 "<html><head><meta http-equiv='Content-Type' content='text/plain'></head><body><table><tr><td>" +
                 `<h3>${variables.title}</h3> ${html}` +
@@ -697,7 +698,6 @@ async function chargeReport(reportType, dateFilter) {
         chargeData.reduce(function (res, value) {
             if (!res[value.error]) {
                 res[value.error] = {
-                    charge_amount: "7 TL",
                     status: value.status,
                     quantity: 0,
                     play_count: 0,

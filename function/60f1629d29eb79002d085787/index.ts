@@ -258,12 +258,12 @@ export async function dashboardPastMatches(req, res) {
                 $gte: begin,
                 $lt: end
             };
-
+            
             const pastMatches = await pastMatchesCollection.aggregate([
                 {
                     $match: {
                         $or: [{ user1: userId.toString() }, { user2: userId.toString() }],
-                        start_time: dateFilter
+                        // start_time: dateFilter
                     },
                 },
                 {
@@ -298,7 +298,7 @@ export async function dashboardPastMatches(req, res) {
             ])
                 .sort({ _id: -1 })
                 .toArray()
-
+            
             pastMatches.forEach(data => {
                 let startTime = new Date(data.start_time);
                 let endTime = new Date(data.end_time);

@@ -9,7 +9,7 @@ triggers:
       timezone: Europe/Istanbul
       frequency: "*/10 * * * *"
     type: schedule
-    active: false
+    active: true
   detectUniqueCharges:
     options:
       method: Get
@@ -40,5 +40,4 @@ triggers:
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
-order: 13
-category: D_1
+order: 11

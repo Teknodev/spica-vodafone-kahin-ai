@@ -24,13 +24,17 @@ export async function chargeRequest(req, res) {
         return res.status(400).send({ message: "Token is not verified." });
     }
 
+	// if(decodedToken.attributes.msisdn == "905317828001"){
+	// 	BipMessage.sendMessageInChat("playGame", "905317828001");
+	// 	return res.status(200).send({ message: 'Charge request success' });
+	// }
     transaction(decodedToken.attributes.msisdn, decodedToken._id, PRODUCT_DAILY)
     return res.status(200).send({ message: 'Charge request success' });
 }
 
 async function transaction(msisdn, identity, product) {
     const transactionId = Date.now()
-    console.log("transactionId", transactionId)
+    
     const reqBody = {
         channelId: 20,
         itemList: [
@@ -55,8 +59,8 @@ async function transaction(msisdn, identity, product) {
     try {
         await Api.httpRequest("post", "https://apigw.bip.com/pgw/paymentService", reqBody, headers)
     } catch (err) {
-        console.log("ERR", error);
-        BipMessage.sendMessage("message", msisdn, "İşlemin gerçekleştirilirken hata oluştu");
+        console.log("ERR", err);
+        BipMessage.sendMessageInChat("message", msisdn, "İşlemin gerçekleştirilirken hata oluştu");
         return {
             status: false,
             message: "Hata oluştu, daha sonra dene "
@@ -98,16 +102,9 @@ async function transactionDataOperations(action, transactionData) {
 }
 
 export async function transactionListener(req, res) {
-    console.log("@transactionListener")
-    const binArray = req.body
-    let str = "";
-
-    for (var i = 0; i < binArray.length; i++) {
-        str += String.fromCharCode(binArray[i]);
-    }
+    const { str } = req.body
 
     const transactionRes = JSON.parse(str);
-    console.log("transactionRes", transactionRes)
 
     const updatedData = {
         transaction_id: String(transactionRes.transactionId),
@@ -123,18 +120,18 @@ export async function transactionListener(req, res) {
 
     switch (transactionRes.resultCode) {
         case 0:
-            BipMessage.sendMessage("message", transactionData.msisdn, "Tebrikler, günlük 1 GB ödülün yüklenince SMS ile bilgilendirileceksin.", 10);
+            BipMessage.sendMessageInChat("message", transactionData.msisdn, "Oyun hakkın yüklenince bilgi vereceğiz", 10);
             commitService(transactionData, transactionRes.additionalInfo.commitToken);
             break;
         case 4010101:
-            BipMessage.sendMessage("message", transactionData.msisdn, "Faturana yansıtma işlemi yapılamadığı için bu avantajlı teklifi kaçırdın! 😔", 10);
+            BipMessage.sendMessageInChat("message", transactionData.msisdn, "Faturana yansıtma işlemi yapılamadığı için bu avantajlı teklifi kaçırdın! 😔", 10);
             break;
         case 4010403:
-            BipMessage.sendMessage("message", transactionData.msisdn, "Turkcell’li olmadığın için bu avantajlı teklifi kaçırdın! 😔", 10);
+            BipMessage.sendMessageInChat("message", transactionData.msisdn, "Turkcell’li olmadığın için bu avantajlı teklifi kaçırdın! 😔", 10);
             break;
         default:
             if (transactionData.msisdn && transactionRes.resultCode != -1101)
-                BipMessage.sendMessage("errorMessage", transactionData.msisdn, "İşlemin gerçekleştirilirken hata oluştu! 😔");
+                BipMessage.sendMessageInChat("errorMessage", transactionData.msisdn, "İşlemin gerçekleştirilirken hata oluştu! 😔");
             break;
     }
 
@@ -162,7 +159,7 @@ async function commitService(transactionData, commitToken) {
     }
 
     try {
-        await Api.httpRequest("post", "https://apigw.bip.com/pgw/commitService", reqBody, headers);
+        const response = await Api.httpRequest("post", "https://apigw.bip.com/pgw/commitService", reqBody, headers);
         updatedData['commit_result'] = JSON.stringify(response.data);
         updatedData['result'] = 'success'
         updatedData['status'] = true
@@ -171,7 +168,7 @@ async function commitService(transactionData, commitToken) {
         console.log("ERR", err);
         updatedData['commit_result'] = JSON.stringify(err);
         updatedData['result'] = 'error'
-        BipMessage.sendMessage("message", transactionData.msisdn, "İşlemin gerçekleştirilirken hata oluştu");
+        BipMessage.sendMessageInChat("message", transactionData.msisdn, "İşlemin gerçekleştirilirken hata oluştu");
     }
 
     transactionDataOperations('update', updatedData).catch((err) => {
@@ -197,7 +194,7 @@ async function successTransaction(transactionData) {
 
     incAvailablePlayByIdentity(transactionData.identity)
     setTimeout(() => {
-        BipMessage.sendMessage("playGame", transactionData.msisdn);
+        BipMessage.sendMessageInChat("playGame", transactionData.msisdn);
     }, 2000)
 
     return true;
@@ -312,7 +309,7 @@ async function setAward(msisdns, winnerIndex, matchId) {
 export async function applyRewardManually(change) {
     const sessionId = await Tcell.getSessionId(TCELL_USERNAME, TCELL_PASSWORD, VARIANT_ID);
 
-    let result;
+    let awardRes;
     let matchID = "";
 
     if (change.current.retry_id) {
@@ -325,13 +322,13 @@ export async function applyRewardManually(change) {
     try {
         awardRes = await Tcell.setAward(sessionId, change.current.msisdn, OFFER_ID_1GB, CAMPAIGN_ID);
         if (awardRes) {
-            Tcell.handleAwardResData(awardRes.data, matchId, 'manual');
+            Tcell.handleAwardResData(awardRes.data, matchID, 'manual');
         }
     } catch (err) {
         console.log("AWARD ERR: ", err)
     }
 
     Api.updateOne(MANUALLY_REWARD_BUCKET, { _id: Api.toObjectId(change.documentKey) }, {
-        $set: { result: result, process_completed: true }
+        $set: { result: awardRes.data, process_completed: true }
     })
 }

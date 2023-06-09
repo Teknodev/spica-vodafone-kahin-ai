@@ -1,30 +1,16 @@
 _id: 60d9d0ed38158a002c392625
-name: _Alert Function
+name: Alert Function
 description: Alert Function
 language: javascript
 timeout: 62
 triggers:
-  duelHighLoads:
-    options:
-      collection: bucket_605ca275e9960e002c2781a4
-      type: INSERT
-    type: database
-    active: false
   checkPastMatch:
     options:
       timezone: Europe/Istanbul
       frequency: "* * * * *"
     type: schedule
-    active: false
-  detectInterruptedGame:
-    options:
-      method: Get
-      path: /detectInterruptedGame
-      preflight: true
-    type: http
-    active: false
+    active: true
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
-order: 9
-category: D_2
+order: 19

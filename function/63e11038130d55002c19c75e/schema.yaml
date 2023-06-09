@@ -18,5 +18,5 @@ env:
   SECRET_API_KEY: "{SECRET_API_KEY}"
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
-order: 18
+order: 5
 category: Server

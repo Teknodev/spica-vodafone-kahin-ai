@@ -9,7 +9,7 @@ const OFFER_ID = 4689;
 
 export async function sendChargeRequest(change) {
     let target = change.document;
-
+    console.log("target: ", target)
     if (target.status) {
         let point = 100;
 
@@ -23,7 +23,7 @@ export async function sendChargeRequest(change) {
             "ChargeDate": target.date
         }
 
-        sendDrawData(obj)
+        // sendDrawData(obj)
     }
 }
 
