@@ -3,13 +3,17 @@ import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
 
 const USER_BUCKET = Environment.env.BUCKET.USER;
 const CHARGE_BUCKET = Environment.env.BUCKET.CHARGE;
+const REWARD_BUCKET = Environment.env.BUCKET.REWARD;
 const PAST_MATCH_BUCKET = Environment.env.BUCKET.PAST_MATCH;
 const BUGGED_REWARD_BUCKET = Environment.env.BUCKET.BUGGED_REWARD;
 const PLAY_COUNT_LOG_BUCKET = Environment.env.BUCKET.PLAY_COUNT_LOG;
 const MANUALLY_REWARD_BUCKET = Environment.env.BUCKET.MANUALLY_REWARD;
 
+const OFFER_ID_1GB = Environment.env.TCELL.OFFER_ID_1GB;
+
 export async function checkReward() {
     await retryTcellIssues().catch(err => console.log("ERROR 13", err));
+    await retryNonRewardedMatches().catch(err => console.log("ERROR 12", err));
 }
 
 async function retryTcellIssues() {
@@ -82,206 +86,121 @@ async function insertReward(msisdn, rewardType, retry_id = "") {
     return true;
 }
 
-export async function detectUniqueCharges(req, res) {
-    const db = await Api.useDatabase();
-
-    let chargeCollection = db.collection(`bucket_60ab7235c03a2d002eb2f574`);
-    let rewardsCollection = db.collection(`bucket_609669f805b0df002ceb2517`);
-
-    let result = await chargeCollection
-        .aggregate([
-            { $match: { status: true } },
-            { $group: { _id: "$msisdn", count: { $sum: 1 } } },
-            { $match: { count: { "$gte": 10 } } }
-        ])
-        .toArray();
-    result = result.map(r => {
-        return { msisdn: r._id, count: r.count };
-    });
-
-    let msisdns = result.map(r => r.msisdn);
-
-
-    let rewardsData = await rewardsCollection
-        .aggregate([
-            { $match: { msisdn: { $in: msisdns }, offer_id: 451319 } },
-            { $group: { _id: "$msisdn", count: { $sum: 1 } } }
-        ])
-        .toArray();
-
-    result.sort((a, b) => a.msisdn - b.msisdn);
-    rewardsData.sort((a, b) => a._id - b._id);
-
-    let total = 0;
-    let warning = [];
-    let max = 0;
-    let min = 99;
-    let diff = null;
-    for (let userIndex in result) {
-        diff = null;
-        //result[userIndex] = { ...result[userIndex], ...userDatas[userIndex] };
-
-        if (rewardsData[userIndex] && result[userIndex].count > rewardsData[userIndex].count) {
-            warning.push(rewardsData[userIndex]);
-            diff = result[userIndex].count - rewardsData[userIndex].count;
-            total += diff;
-        }
-
-        if (diff && max < diff) {
-            max = diff;
-            if (max > 90)
-                console.log(result[userIndex].count, rewardsData[userIndex].count, max, diff);
-        }
-
-        if (diff && min > diff) {
-            min = diff;
-        }
-    }
-
-
-    return { result, warning, results: result.length, warnings: warning.length, total, max, min };
-}
-
-export async function detectMissingAvailablePlay() {
+export async function retryNonRewardedMatches() {
+    console.log("@retryNonRewardedMatches")
     const db = await Api.useDatabase();
 
     const pastMatchesCollection = db.collection(`bucket_${PAST_MATCH_BUCKET}`);
-    const chargeCollection = db.collection(`bucket_${CHARGE_BUCKET}`);
+    const rewardsCollection = db.collection(`bucket_${REWARD_BUCKET}`);
     const usersCollection = db.collection(`bucket_${USER_BUCKET}`);
-    const playCountCollection = db.collection(`bucket_${PLAY_COUNT_LOG_BUCKET}`);
     const identityCollection = db.collection(`identity`);
+    let minDate = new Date();
+    let maxDate = new Date();
+    minDate.setMinutes(minDate.getMinutes() - 11);
+    maxDate.setMinutes(maxDate.getMinutes() - 1);
 
-    const uniqueMatches = [];
-    const msisdns = [];
-    const identitiesId = [];
-    const resultArr = [];
+    const usersArr = [];
 
-    const minDate = new Date();
-    minDate.setHours(minDate.getHours() - 2);
-
-    const maxDate = new Date();
-    maxDate.setMinutes(maxDate.getMinutes() - 10);
-
-    const matchMaxDate = new Date();
-    matchMaxDate.setMinutes(matchMaxDate.getMinutes() - 5);
-
-    const chargeResult = await chargeCollection
-        .aggregate([
-            { $match: { status: true, date: { $gte: minDate, $lte: maxDate } } },
-            { $group: { _id: "$msisdn", count: { $sum: 1 } } }
-        ])
-        .toArray();
-
-    chargeResult.forEach(charge => {
-        msisdns.push(charge._id.substr(2));
-    });
-
-    const identities = await identityCollection
-        .find({ "attributes.msisdn": { $in: msisdns } })
+    const duels = await pastMatchesCollection
+        .find({
+            end_time: {
+                $gte: minDate,
+                $lt: maxDate
+            }
+        })
         .toArray()
-        .catch(err => console.log("ERROR 17", err));
+        .catch(err => console.log("ERROR 8 ", err));
 
-    identities.forEach(identity => {
-        identitiesId.push(String(identity._id));
-    });
-
-    const users = await usersCollection
-        .find({ identity: { $in: identitiesId } })
+    const rewards = await rewardsCollection
+        .find({ date: { $gte: minDate, $lt: maxDate } })
         .toArray()
-        .catch(err => console.log("ERROR 18", err));
+        .catch(err => console.log("ERROR 9 ", err));
 
-    let user1Paid = await pastMatchesCollection
-        .aggregate([
-            { $match: { start_time: { $gte: minDate, $lte: matchMaxDate }, user1_is_free: false } },
-            { $group: { _id: "$user1", count: { $sum: 1 } } }
-        ])
+    for (let duel of duels) {
+        usersArr.push(Api.toObjectId(duel.user1));
+        usersArr.push(Api.toObjectId(duel.user2));
+    }
+
+    const usersData = await usersCollection
+        .find({ _id: { $in: usersArr } })
         .toArray()
-        .catch(err => console.log("ERROR 19", err));
+        .catch(err => console.log("ERROR 10 ", err));
 
-    let user2Paid = await pastMatchesCollection
-        .aggregate([
-            {
-                $match: {
-                    start_time: { $gte: minDate, $lte: matchMaxDate },
-                    user2_is_free: false,
-                    player_type: 0
-                }
-            },
-            { $group: { _id: "$user2", count: { $sum: 1 } } }
-        ])
+    const users = usersData.filter(user => !user.bot);
+    const usersIdentities = Array.from(users, user => Api.toObjectId(user.identity))
+
+    const identitiesData = await identityCollection
+        .find({ _id: { $in: usersIdentities } })
         .toArray()
-        .catch(err => console.log("ERROR 20", err));
-
-    let concatedMatches = user1Paid.concat(user2Paid);
-
-    concatedMatches.reduce(function (res, value) {
-        if (!res[value._id]) {
-            res[value._id] = {
-                _id: value._id,
-                count: 0
-            };
-            uniqueMatches.push(res[value._id]);
-        }
-        res[value._id].count += value.count;
-        return res;
-    }, {});
+        .catch(err => console.log("ERROR 11 ", err));
 
     users.forEach(user => {
-        let userIdeentity = identities.find(identity => String(identity._id) == user.identity);
-        let userMatch = uniqueMatches.find(userMatch => userMatch._id == String(user._id));
-        userIdeentity ? (user["msisdn"] = userIdeentity.attributes.msisdn) : undefined;
-        userMatch ? (user["match_count"] = userMatch.count) : undefined;
+        user["msisdn"] = identitiesData.filter(
+            idn => idn._id == user.identity
+        )[0].attributes.msisdn;
     });
 
+    let reward = [];
+    for (let duel of duels) {
+        let user2Data = usersData.find(user => {
+            return user._id == duel.user2;
+        });
 
-    const manuallyAdded = [];
-    //console.log("chargeResult",chargeResult.length)
-    chargeResult.forEach(charge => {
-        let chargeUser = users.find(
-            user => user.msisdn == charge._id.substr(2)
-        );
-        if (chargeUser) {
-            let userMatchCount = chargeUser.available_play_count + (chargeUser.match_count || 0);
-            if (charge.count > userMatchCount) {
-                chargeUser["missing_play_count"] = charge.count - userMatchCount;
-                manuallyAdded.push(chargeUser);
-                resultArr.push({
-                    _id: chargeUser._id,
-                    msisdn: charge._id,
-                    missing_play_count: charge.count - userMatchCount
-                });
+        let usersMsisdn = [];
+        let usersIsFree = [];
+        let user = null;
+
+        if (duel.winner == 1 || duel.winner == 3) {
+            let tempUserMsisdn = users.find(user => {
+                return user._id == duel.user1;
+            }).msisdn;
+
+            usersMsisdn.push(tempUserMsisdn)
+            usersIsFree.push(duel.user1_is_free);
+            user = duel.user1;
+        }
+
+        if ((duel.winner == 2 || duel.winner == 3) && !user2Data.bot) {
+            let tempUserMsisdn = users.find(user => {
+                return user._id == duel.user2;
+            });
+            tempUserMsisdn = tempUserMsisdn ? tempUserMsisdn.msisdn : "";
+
+            usersMsisdn.push(tempUserMsisdn)
+            usersIsFree.push(duel.user2_is_free);
+
+            user = duel.user2;
+        }
+
+        for (const [index, msisdn] of usersMsisdn.entries()) {
+            if (msisdn && user) {
+                reward = rewards.find(el => {
+                    return (
+                        el.msisdn.includes(msisdn) &&
+                        el.match_id == duel._id.toString() &&
+                        el.offer_id == OFFER_ID_1GB
+                        //(el.status == true || (el.status == false && errors.includes(el.error_id)))
+                    );
+                })
+                    ? reward
+                    : [
+                        ...reward,
+                        {
+                            msisdn: msisdn,
+                            reward: usersIsFree[index] ? "hourly_1" : "daily_1"
+                        }
+                    ];
             }
         }
-    });
-
-    for (let user of manuallyAdded) {
-        await usersCollection
-            .updateOne(
-                { _id: Api.toObjectId(user._id) },
-                {
-                    $inc: {
-                        available_play_count: user.missing_play_count
-                    }
-                }
-            )
-            .catch(err => console.log("ERROR 21", err));
     }
 
-    if (resultArr.length > 0) {
-        let insertedData = {
-            title: "Play Count",
-            added_play_count: [],
-            created_at: new Date(),
-        }
-        resultArr.forEach(el => {
-            insertedData.added_play_count.push({
-                missing_play_count: el.missing_play_count,
-                msisdn: el.msisdn
-            })
-        })
-        await playCountCollection.insertOne(insertedData).catch(err => console.log("ERR", err))
-        console.log("Manually Added Play Count: ", resultArr);
+    if (reward.length) {
+        console.log("NONE REWARDED", reward)
     }
 
+    for (let rew of reward) {
+        await insertReward(rew.substring(2), rew.reward);
+    }
 
+    return true
 }
