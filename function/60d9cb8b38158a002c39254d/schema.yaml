@@ -1,27 +1,34 @@
 _id: 60d9cb8b38158a002c39254d
-name: Fast Login & Register
+name: Auth
 description: Login & Register with using fastlogin system of Turkcell
 language: javascript
 timeout: 62
 triggers:
-  fastLogin:
+  login:
     options:
       method: Post
-      path: /fastLogin
+      path: /login
       preflight: true
     type: http
     active: true
-  fastRegister:
+  register:
     options:
       method: Post
-      path: /fastRegister
+      path: /register
       preflight: true
     type: http
     active: true
-  fastUserUpdate:
+  userUpdate:
     options:
       method: Post
-      path: /fastUserUpdate
+      path: /user-update
+      preflight: true
+    type: http
+    active: true
+  getRedirectURL:
+    options:
+      method: Get
+      path: /getRedirectURL
       preflight: true
     type: http
     active: true

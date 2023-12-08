@@ -10,30 +10,15 @@ triggers:
       preflight: true
     type: http
     active: true
-  decreasePlayCount:
-    options:
-      path: /decreasePlayCount
-      method: Post
-      preflight: true
-    type: http
-    active: true
-  clearIdentity:
+  clearScheduler:
     options:
       timezone: UTC
       frequency: "*/5 * * * *"
     type: schedule
     active: true
-  updateServerInfo:
-    options:
-      method: Post
-      path: /updateServerInfo
-      preflight: true
-    type: http
-    active: true
 env:
   DUEL_BUCKET_ID: "{DUEL_BUCKET_ID}"
-  SECRET_API_KEY: "{SECRET_API_KEY}"
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
-order: 4
+order: 7
 category: Server

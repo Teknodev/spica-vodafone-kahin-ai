@@ -1,5 +1,5 @@
 _id: 60d9ccfe38158a002c39258c
-name: Game Flow Operations
+name: Game Flow
 description: Adds new available play for the user
 language: javascript
 timeout: 60
@@ -23,14 +23,8 @@ triggers:
       preflight: true
     type: http
     active: true
-  transactionListener:
-    options:
-      method: Post
-      path: /transactionListener
-      preflight: true
-    type: http
-    active: true
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
-order: 7
+order: 17
+category: Game

@@ -8,10 +8,18 @@ triggers:
   matchmaker:
     options:
       timezone: Europe/Istanbul
-      frequency: "*/5 * * * * *"
+      frequency: "* * * * *"
     type: schedule
+    active: true
+  assignDuel:
+    options:
+      method: Post
+      path: /assign-duel
+      preflight: true
+    type: http
     active: true
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
-order: 9
+order: 18
+category: Game

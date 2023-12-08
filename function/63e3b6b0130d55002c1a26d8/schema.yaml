@@ -8,13 +8,13 @@ triggers:
       collection: bucket_60742ed3f95e39002c4917ae
       type: INSERT
     type: database
-    active: true
+    active: false
   onChargeUpdated:
     options:
       collection: bucket_60ab7235c03a2d002eb2f574
       type: UPDATE
     type: database
-    active: true
+    active: false
   sendManuallyData:
     options:
       method: Get
@@ -25,4 +25,5 @@ triggers:
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
-order: 24
+order: 16
+category: Operation

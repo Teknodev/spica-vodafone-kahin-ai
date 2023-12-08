@@ -1,11 +1,11 @@
 import * as Api from "../../63b57559ebfd83002c5defe5/.build";
 import * as User from "../../63b6a403ebfd83002c5e104e/.build";
-import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
+import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
 import fetch from 'node-fetch';
 
-const PAST_MATCHES_BUCKET = Environment.env.PAST_MATCHES;
-const CHARGE_LOGS_BUCKET = Environment.env.CHARGE_LOGS;
+const PAST_MATCHES_BUCKET = VARIABLE.PAST_MATCHES;
+const CHARGE_LOGS_BUCKET = VARIABLE.CHARGE_LOGS;
 
 const CHARGE_AMOUNT = "15";
 const CHARGE_PRODUCT = "261659";

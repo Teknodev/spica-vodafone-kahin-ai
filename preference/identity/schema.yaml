@@ -20,3 +20,8 @@ attributes:
       title: Duel_id
       description: Description of 'Duel_id'
       options: {}
+    service:
+      type: string
+      title: service
+      description: Description of 'service'
+      options: {}

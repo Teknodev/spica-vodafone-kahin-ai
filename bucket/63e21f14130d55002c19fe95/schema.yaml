@@ -27,6 +27,7 @@ properties:
     relationType: onetoone
     bucketId: 605c9480e9960e002c278191
     dependent: false
+    primary: name
   user1_token:
     type: string
     title: user1_token
@@ -42,6 +43,7 @@ properties:
     relationType: onetoone
     bucketId: 605c9480e9960e002c278191
     dependent: false
+    primary: name
   user2_token:
     type: string
     title: user2_token
@@ -83,7 +85,13 @@ properties:
     options:
       position: bottom
     default: false
+  reference_no:
+    type: string
+    title: reference_no
+    description: Description of the reference_no input
+    options:
+      position: bottom
 acl:
   write: true==true
   read: true==true
-order: 26
+order: 29

@@ -5,11 +5,11 @@ timeout: 18.8
 triggers:
   default:
     type: http
-    active: true
+    active: false
     options:
       method: Get
       path: /
       preflight: true
 env: {}
 memoryLimit: 100
-order: 20
+order: 25

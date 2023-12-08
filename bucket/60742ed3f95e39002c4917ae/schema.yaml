@@ -99,22 +99,6 @@ properties:
     options:
       position: bottom
     default: 0
-  user1_is_free:
-    type: boolean
-    title: user1_is_free
-    description: Description of the user1_is_free input
-    options:
-      position: bottom
-      index: true
-    default: false
-  user2_is_free:
-    type: boolean
-    title: user2_is_free
-    description: Description of the user2_is_free input
-    options:
-      position: bottom
-      index: true
-    default: false
   duel_id:
     type: string
     title: duel_id
@@ -125,5 +109,5 @@ properties:
 acl:
   write: true==true
   read: true==true
-order: 7
+order: 6
 category: Match

@@ -1,20 +1,27 @@
 _id: 60d9c65f38158a002c392492
-name: Test Login & Register
+name: Test Auth
 description: Test login and register operations
 language: javascript
 timeout: 73
 triggers:
-  register:
+  testRegister:
     options:
       method: Post
-      path: /register
+      path: /test-register
       preflight: true
     type: http
     active: true
-  login:
+  testLogin:
     options:
       method: Post
-      path: /login
+      path: /test-login
+      preflight: true
+    type: http
+    active: true
+  testUserUpdate:
+    options:
+      method: Post
+      path: /test-user-update
       preflight: true
     type: http
     active: true

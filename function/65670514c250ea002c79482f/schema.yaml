@@ -1,0 +1,15 @@
+_id: 65670514c250ea002c79482f
+name: Service Listener
+language: javascript
+timeout: 15.6
+triggers:
+  serviceListener:
+    type: http
+    active: true
+    options:
+      method: Post
+      path: /service-listener
+      preflight: true
+env:
+  NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
+memoryLimit: 100

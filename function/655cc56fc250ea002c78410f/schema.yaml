@@ -1,0 +1,15 @@
+_id: 655cc56fc250ea002c78410f
+name: PMP Encrypt-Decrypt
+language: javascript
+timeout: 32.2
+triggers:
+  ectyptDecrypt:
+    options:
+      method: Get
+      path: /ectyptDecrypt
+      preflight: true
+    type: http
+    active: false
+env: {}
+memoryLimit: 100
+order: 27

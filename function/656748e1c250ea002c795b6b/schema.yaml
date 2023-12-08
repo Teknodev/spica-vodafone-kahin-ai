@@ -1,0 +1,21 @@
+_id: 656748e1c250ea002c795b6b
+name: Subscription
+language: javascript
+timeout: 27.5
+triggers:
+  default:
+    type: http
+    active: false
+    options:
+      method: Get
+      path: /
+      preflight: true
+  createSubscription:
+    options:
+      method: Get
+      path: /createSubscription
+      preflight: true
+    type: http
+    active: true
+env: {}
+memoryLimit: 100

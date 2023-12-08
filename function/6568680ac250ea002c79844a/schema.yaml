@@ -1,0 +1,14 @@
+_id: 6568680ac250ea002c79844a
+name: Reward
+language: javascript
+timeout: 34.6
+triggers:
+  setReward:
+    type: http
+    active: true
+    options:
+      method: Get
+      path: /setReward
+      preflight: true
+env: {}
+memoryLimit: 100

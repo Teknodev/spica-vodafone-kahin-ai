@@ -9,8 +9,9 @@ triggers:
       bucket: 60bf26f4c48b36002dd87e01
       type: INSERT
     type: bucket
-    active: true
+    active: false
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
 order: 12
+category: Operation

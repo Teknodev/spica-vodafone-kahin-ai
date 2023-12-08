@@ -1,22 +1,22 @@
 import * as Api from "../../63b57559ebfd83002c5defe5/.build";
-import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
+import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
 const nodemailer = require("nodemailer");
 
-const nodeMailerUser = Environment.env.MAILER.SMTP_USER || null;
-const nodeMailerHost = Environment.env.MAILER.SMTP_HOST || null;
-const nodeMailerPassword = Environment.env.MAILER.SMTP_PASSWORD || null;
-const mailFrom = Environment.env.MAILER.MAIL_FROM || null;
+const nodeMailerUser = VARIABLE.MAILER.SMTP_USER || null;
+const nodeMailerHost = VARIABLE.MAILER.SMTP_HOST || null;
+const nodeMailerPassword = VARIABLE.MAILER.SMTP_PASSWORD || null;
+const mailFrom = VARIABLE.MAILER.MAIL_FROM || null;
 
-const MATCH_REPORT_BUCKET = Environment.env.BUCKET.MATCH_REPORT;
-const CHARGE_REPORT_BUCKET = Environment.env.BUCKET.CHARGE_REPORT;
-const USER_REPORT_BUCKET = Environment.env.BUCKET.USER_REPORT;
-const USER_MATCH_REPORT_BUCKET = Environment.env.BUCKET.USER_MATCH_REPORT;
-const WIN_LOSE_MATCH_BUCKET = Environment.env.BUCKET.WIN_LOSE_MATCH;
-const ANSWER_TO_QUESTION_REPORT_BUCKET = Environment.env.BUCKET.ANSWER_TO_QUESTION_REPORT;
-const RETRY_REPORT_BUCKET = Environment.env.BUCKET.RETRY_REPORT;
-const REWARD_REPORT_BUCKET = Environment.env.BUCKET.REWARD_REPORT;
-const REWARD_MAILER = Environment.env.BUCKET.MAILER;
+const MATCH_REPORT_BUCKET = VARIABLE.BUCKET.MATCH_REPORT;
+const CHARGE_REPORT_BUCKET = VARIABLE.BUCKET.CHARGE_REPORT;
+const USER_REPORT_BUCKET = VARIABLE.BUCKET.USER_REPORT;
+const USER_MATCH_REPORT_BUCKET = VARIABLE.BUCKET.USER_MATCH_REPORT;
+const WIN_LOSE_MATCH_BUCKET = VARIABLE.BUCKET.WIN_LOSE_MATCH;
+const ANSWER_TO_QUESTION_REPORT_BUCKET = VARIABLE.BUCKET.ANSWER_TO_QUESTION_REPORT;
+const RETRY_REPORT_BUCKET = VARIABLE.BUCKET.RETRY_REPORT;
+const REWARD_REPORT_BUCKET = VARIABLE.BUCKET.REWARD_REPORT;
+const REWARD_MAILER = VARIABLE.BUCKET.MAILER;
 
 /*
     REPORT TYPES: 
@@ -40,16 +40,12 @@ export default async function (change) {
         .catch(err => console.log("ERROR 42", err));
     template = template[0];
 
-    let content = template.content;
     let variables = JSON.parse(change.current.variables);
     let emails = change.current.emails;
     let reportType = change.current.report_type;
     
     const html = await getData(reportType).catch(err => console.log("ERROR 9", err));
 
-    // for (const [key, value] of Object.entries(variables)) {
-    //     content = content.replace(new RegExp(`{{${key}}}`, "g"), value);
-    // }
     if (emails.length) {
         for (let email of emails) {
             _sendEmail(variables, email, template.subject, html);

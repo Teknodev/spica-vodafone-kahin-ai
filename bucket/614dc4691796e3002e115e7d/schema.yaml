@@ -45,5 +45,5 @@ properties:
 acl:
   write: true==true
   read: true==true
-order: 20
+order: 19
 category: Logs

@@ -1,19 +1,19 @@
 import * as Api from "../../63b57559ebfd83002c5defe5/.build";
-import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
+import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
 const CryptoJS = require("crypto-js");
 const json2csv = require("json2csv").parse;
 
-const PAST_MATCH_BUCKET = Environment.env.BUCKET.PAST_MATCH;
-const USER_BUCKET = Environment.env.BUCKET.USER;
-const REWARD_LOG_BUCKET = Environment.env.BUCKET.REWARD_LOG;
-const CHARGE_LOG_BUCKET = Environment.env.BUCKET.CHARGE_LOG;
-const MANUALLY_REWARD_BUCKET = Environment.env.BUCKET.MANUALLY_REWARD;
-const CONTACT_BUCKET = Environment.env.BUCKET.CONTACT;
-const CONFIGURATION_BUCKET = Environment.env.BUCKET.CONFIGURATION;
-const BUGGED_REWARD_BUCKET = Environment.env.BUCKET.BUGGED_REWARD;
+const PAST_MATCH_BUCKET = VARIABLE.BUCKET.PAST_MATCH;
+const USER_BUCKET = VARIABLE.BUCKET.USER;
+const REWARD_LOG_BUCKET = VARIABLE.BUCKET.REWARD_LOG;
+const CHARGE_LOG_BUCKET = VARIABLE.BUCKET.CHARGE_LOG;
+const MANUALLY_REWARD_BUCKET = VARIABLE.BUCKET.MANUALLY_REWARD;
+const CONTACT_BUCKET = VARIABLE.BUCKET.CONTACT;
+const CONFIGURATION_BUCKET = VARIABLE.BUCKET.CONFIGURATION;
+const BUGGED_REWARD_BUCKET = VARIABLE.BUCKET.BUGGED_REWARD;
 
-const CHARGE_AMOUNT = Environment.env.TCELL.CHARGE_AMOUNT;
+const CHARGE_AMOUNT = VARIABLE.TCELL.CHARGE_AMOUNT;
 
 const unauthorizedResMsg = {
     statusCode: 401,

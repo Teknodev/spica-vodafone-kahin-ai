@@ -1,8 +1,8 @@
 import * as Api from "../../63b57559ebfd83002c5defe5/.build";
-import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
+import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
-const ALERT_BUCKET = Environment.env.BUCKET.ALERT;
-const PAST_MATCH_BUCKET = Environment.env.BUCKET.PAST_MATCH;
+const ALERT_BUCKET = VARIABLE.BUCKET.ALERT;
+const PAST_MATCH_BUCKET = VARIABLE.BUCKET.PAST_MATCH;
 
 export async function checkPastMatch() {
     const now = new Date();

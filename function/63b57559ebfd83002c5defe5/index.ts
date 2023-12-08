@@ -1,12 +1,10 @@
-import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
-
 import * as Bucket from "@spica-devkit/bucket"
 import * as Identity from "@spica-devkit/identity";
 import { database, ObjectId } from "@spica-devkit/database";
+import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 import axios from 'axios';
 
-const SECRET_API_KEY = Environment.env.SECRET_API_KEY;
-let db;
+const SECRET_API_KEY = VARIABLE.SECRET_API_KEY;
 
 export function useBucket(initializeParams = { apikey: SECRET_API_KEY }) {
     Bucket.initialize(initializeParams);
@@ -19,7 +17,7 @@ export function useIdentity(initializeParams = { apikey: SECRET_API_KEY }) {
 }
 
 export async function useDatabase() {
-    if (!db) db = await database().catch(err => console.log("Error Use Database: ", err));
+    const db = await database().catch(err => console.log("Error Use Database: ", err));
     return db;
 }
 

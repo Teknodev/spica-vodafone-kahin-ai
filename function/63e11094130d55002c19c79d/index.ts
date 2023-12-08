@@ -1,22 +1,19 @@
-import { database, ObjectId } from "@spica-devkit/database";
-import fetch from 'node-fetch';
+import * as Api from "../../655b4080c250ea002c7832a7/.build";
+import { env as VARIABLE } from "../../655b40e8c250ea002c783322/.build";
 
-const DUEL_BUCKET = process.env.DUEL_BUCKET;
-const MAIN_SERVER_URL = "https://bip-4islem-d6738.hq.spicaengine.com/api";
-const OPERATION_KEY = '6Ww7PajcsGH34PbE';
-
-let db;
+const DUEL_INFO_BUCKET = VARIABLE.BUCKET.DUEL_INFO;
+const SAYI_KRALI_DUEL_BUCKET = VARIABLE.BUCKET.SAYI_KRALI_DUEL;
+const MAIN_SERVER_URL = VARIABLE.MAIN_SERVER_URL[VARIABLE.SERVICE.SAYI_KRALI];
+const OPERATION_KEY = VARIABLE.OPERATION_KEY;
 
 export async function checkFinishedDuels() {
-    if (!db) {
-        db = await database().catch(err => console.log("ERROR 2", err));
-    }
+    const db = await Api.useDatabase();
 
     const t = new Date();
     t.setSeconds(t.getSeconds() - 130);
 
     const finishedDuels = await db
-        .collection(`bucket_${DUEL_BUCKET}`)
+        .collection(`bucket_${SAYI_KRALI_DUEL_BUCKET}`)
         .aggregate([
             {
                 $match: {
@@ -42,27 +39,26 @@ export async function checkFinishedDuels() {
                 user2_answers: duel.user2_answers,
                 user1_points: duel.user1_points,
                 user2_points: duel.user2_points,
-                start_time: ObjectId(duelId).getTimestamp(),
+                start_time: Api.toObjectId(duelId).getTimestamp(),
                 end_time: new Date(),
-                user1_is_free: duel.user1_is_free,
-                user2_is_free: duel.user2_is_free,
                 player_type: duel.player_type,
             }
 
             if (duel.winner == 0) {
-                fetchOperation('insertPastMatchFromServer', duelData)
+                httpRequest('insertPastMatchFromServer', duelData)
             } else {
-                fetchOperation('insertDeletedMatch', duelData)
+                httpRequest('insertDeletedMatch', duelData)
             }
 
-            fetchOperation('removeServerInfoExternal', duel)
+            httpRequest('removeServerInfoExternal', duel)
 
             removeIndetity(duelId)
+            removeServerInfo(duelId)
 
             await db
-                .collection(`bucket_${DUEL_BUCKET}`)
+                .collection(`bucket_${SAYI_KRALI_DUEL_BUCKET}`)
                 .deleteOne({
-                    _id: ObjectId(duelId)
+                    _id: Api.toObjectId(duelId)
                 })
                 .catch(err => console.log("ERROR 8", err));
         }
@@ -72,34 +68,27 @@ export async function checkFinishedDuels() {
     t2.setSeconds(t2.getSeconds() - 130);
 
     await db
-        .collection(`bucket_${DUEL_BUCKET}`)
+        .collection(`bucket_${SAYI_KRALI_DUEL_BUCKET}`)
         .deleteMany({ created_at: { $lt: t2 }, last_food_eat_date: { $exists: false } })
         .catch(err => console.log("ERROR 10", err));
 }
 
-async function fetchOperation(functionName, duel) {
-    await fetch(
-        `${MAIN_SERVER_URL}/fn-execute/${functionName}`,
-        {
-            method: "post",
-            body: JSON.stringify({
-                duel: duel,
-                key: OPERATION_KEY
-            }),
-            headers: {
-                "Content-Type": "application/json",
-            }
-        }
-    ).catch(err => console.log("ERROR FETCH OPERATION", err));
+async function httpRequest(functionName, duel) {
+    await Api.httpRequest("post", `${MAIN_SERVER_URL}/fn-execute/${functionName}`, {
+        duel: duel,
+        key: OPERATION_KEY
+    }, {}).catch(err => console.log("ERROR FETCH OPERATION", err));
 
     return true
 }
 
 async function removeIndetity(duel_id) {
-    if (!db) {
-        db = await database().catch(err => console.log("ERROR ", err));
-    }
-
+    const db = await Api.useDatabase();
     await db.collection('identity').deleteMany({ "attributes.duel_id": duel_id })
         .catch(err => console.log("ERROR ", err))
+}
+
+async function removeServerInfo(duel_id) {
+    const db = await Api.useDatabase();
+    db.collection(`bucket_${DUEL_INFO_BUCKET}`).deleteOne({ duel_id })
 }

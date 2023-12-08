@@ -1,0 +1,16 @@
+_id: 655b4080c250ea002c7832a7
+name: ServerApi
+language: javascript
+timeout: 60
+triggers:
+  default:
+    type: http
+    active: false
+    options:
+      method: Get
+      path: /
+      preflight: true
+env: {}
+memoryLimit: 100
+order: 10
+category: Server

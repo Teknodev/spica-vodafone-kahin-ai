@@ -9,7 +9,7 @@ triggers:
       timezone: Europe/Istanbul
       frequency: "*/10 * * * *"
     type: schedule
-    active: true
+    active: false
   retryNonRewardedMatches:
     options:
       method: Get
@@ -20,4 +20,5 @@ triggers:
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
-order: 11
+order: 20
+category: Game

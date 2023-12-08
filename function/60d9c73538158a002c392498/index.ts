@@ -1,14 +1,10 @@
 import * as Api from "../../63b57559ebfd83002c5defe5/.build";
-import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
+import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
-const MATCHMAKING_BUCKET = Environment.env.BUCKET.MATCHMAKING;
-const USER_BUCKET = Environment.env.BUCKET.USER;
-const BOT_BUCKET = Environment.env.BUCKET.BOT;
-const SERVER_INFO_BUCKET = Environment.env.BUCKET.SERVER_INFO;
-
-const MATCH_SERVERS = [
-    { title: 'bip-4islem-d6738', api_key: '406bus18l2yiufdq' },
-]
+const MATCHMAKING_BUCKET = VARIABLE.BUCKET.MATCHMAKING;
+const USER_BUCKET = VARIABLE.BUCKET.USER;
+const BOT_BUCKET = VARIABLE.BUCKET.BOT;
+const SERVER_INFO_BUCKET = VARIABLE.BUCKET.SERVER_INFO;
 
 export async function matchmaker() {
     const db = await Api.useDatabase();
@@ -16,74 +12,80 @@ export async function matchmaker() {
     const userCollection = db.collection(`bucket_${USER_BUCKET}`);
     const botCollection = db.collection(`bucket_${BOT_BUCKET}`);
 
-    let match_making_users = await matchmakingCollection
-        .aggregate([
-            {
-                $set: {
-                    _id: {
-                        $toString: "$_id"
-                    },
-                    user: {
-                        $toObjectId: "$user"
+    setInterval(async () => {
+        let match_making_users = await matchmakingCollection
+            .aggregate([
+                {
+                    $set: {
+                        _id: {
+                            $toString: "$_id"
+                        },
+                        user: {
+                            $toObjectId: "$user"
+                        }
+                    }
+                },
+                {
+                    $lookup: {
+                        from: `bucket_${USER_BUCKET}`,
+                        localField: "user",
+                        foreignField: "_id",
+                        as: "user"
+                    }
+                },
+                {
+                    $unwind: { path: "$user", preserveNullAndEmptyArrays: true }
+                },
+                {
+                    $set: {
+                        "user._id": {
+                            $toString: "$user._id"
+                        }
                     }
                 }
-            },
-            {
-                $lookup: {
-                    from: `bucket_${USER_BUCKET}`,
-                    localField: "user",
-                    foreignField: "_id",
-                    as: "user"
-                }
-            },
-            {
-                $unwind: { path: "$user", preserveNullAndEmptyArrays: true }
-            },
-            {
-                $set: {
-                    "user._id": {
-                        $toString: "$user._id"
-                    }
-                }
-            }
-        ])
-        .toArray()
-        .catch(err => console.log("ERROR 1", err));
+            ])
+            .toArray()
+            .catch(err => console.log("ERROR 1", err));
 
-    let { matched_with_user, matched_with_bots } = seperateMatchingsUsers([
-        ...match_making_users
-    ]);
+        if (match_making_users.length) {
+            console.log("@match_making_users: ", match_making_users)
+        }
 
-    // 1 - add mathced users to ->> duel ->> delete from ->> matchmaking bucket
-    let duels_with_user_array = createDuelObjectsWithUser([...matched_with_user]);
-    if (duels_with_user_array.length > 0) {
-        checkAvailability(duels_with_user_array[0]);
-    }
+        let { matched_with_user, matched_with_bots } = seperateMatchingsUsers([
+            ...match_making_users
+        ]);
 
-    let delete_match_with_user_filter = matchedWithUserDeleteFilter([...matched_with_user]);
-    await matchmakingCollection.deleteMany(delete_match_with_user_filter);
+        // 1 - add mathced users to ->> duel ->> delete from ->> matchmaking bucket
+        let duels_with_user_array = createDuelObjectsWithUser([...matched_with_user]);
+        if (duels_with_user_array.length > 0) {
+            requestForANewGame(duels_with_user_array[0]);
+        }
 
-    // 2 - get random bot ->> add matched users(matched with bot) to ->> duel ->> delete these users from ->> matchmaking bucket
+        let delete_match_with_user_filter = matchedWithUserDeleteFilter([...matched_with_user]);
+        await matchmakingCollection.deleteMany(delete_match_with_user_filter);
 
-    let randomBot = await botCollection
-        .aggregate([{ $sample: { size: 1 } }])
-        .toArray()
-        .catch(err => console.log("ERROR", err));
+        // 2 - get random bot ->> add matched users(matched with bot) to ->> duel ->> delete these users from ->> matchmaking bucket
 
-    let bot = await userCollection
-        .findOne({ _id: randomBot[0]._id })
-        .catch(err => console.log("ERROR 2", err));
+        let randomBot = await botCollection
+            .aggregate([{ $sample: { size: 1 } }])
+            .toArray()
+            .catch(err => console.log("ERROR", err));
+
+        let bot = await userCollection
+            .findOne({ _id: randomBot[0]._id })
+            .catch(err => console.log("ERROR 2", err));
 
 
-    let duels_with_bots_array = createDuelObjectsWithBot([...matched_with_bots], bot);
-    if (duels_with_bots_array.length > 0) {
-        checkAvailability(duels_with_bots_array[0]);
-    }
+        let duels_with_bots_array = createDuelObjectsWithBot([...matched_with_bots], bot);
+        if (duels_with_bots_array.length > 0) {
+            requestForANewGame(duels_with_bots_array[0]);
+        }
 
-    let delete_match_with_bot_filter = nonMatchedWithUserDeleteFilter([...matched_with_bots]);
-    await matchmakingCollection.deleteMany(
-        delete_match_with_bot_filter
-    );
+        let delete_match_with_bot_filter = nonMatchedWithUserDeleteFilter([...matched_with_bots]);
+        await matchmakingCollection.deleteMany(
+            delete_match_with_bot_filter
+        );
+    }, 5000);
 }
 
 // DATA MANIPULATION FUNCTIONS
@@ -100,10 +102,8 @@ function createDuelObjectsWithUser(matchmaking_users) {
             user1_ingame: false,
             user2_ingame: false,
             created_at: current_date,
-            user1_is_free: matchmaking_user[0].user.free_play,
-            user2_is_free: matchmaking_user[1].user.free_play,
-            user1_life: matchmaking_user[0].user.free_play == true ? 0 : 3,
-            user2_life: matchmaking_user[1].user.free_play == true ? 0 : 3,
+            user1_life: 3,
+            user2_life: 3,
             user1_points: 0,
             user2_points: 0,
             player_type: 0
@@ -126,9 +126,7 @@ function createDuelObjectsWithBot(matchmaking_users, bot) {
             user1_ingame: false,
             user2_ingame: true,
             created_at: current_date,
-            user1_is_free: matchmaking_user.user.free_play,
-            user2_is_free: false,
-            user1_life: matchmaking_user.user.free_play == true ? 0 : 3,
+            user1_life: 3,
             user2_life: 3,
             user1_points: 0,
             user2_points: 0,
@@ -227,68 +225,58 @@ function inMatched(matchmaking_user, matched) {
     return response;
 }
 
-// TODO
-let _counter = 0;
-async function checkAvailability(data) {
+async function requestForANewGame(data) {
     data["user1"] = String(data.user1);
     data["user2"] = String(data.user2);
-    let users = [String(data.user1)];
 
+    const users = [String(data.user1)];
     if (data.player_type == 0) {
         users.push(String(data.user2));
     }
 
-    _counter++;
+    // !TODO should send this request to the message broker
+    // https://vodafone.queue.spicaengine.com/message?topic_id=657310d3f1bac9002c940b22
+    // https://vodafone-sayi-krali-a4d57.hq.spicaengine.com/api/fn-execute/new-game-listener
+    Api.httpRequest('post', 'https://vodafone-sayi-krali-a4d57.hq.spicaengine.com/api/fn-execute/new-game-listener', {
+        "referenceNo": String(Date.now()),
+        "service": "sayi_krali",
+        "data": data,
+        "users": users
+    }, {}).catch(err => console.log("ERR: ", err));
+}
 
-    let _tempCounter = _counter;
-    let postData = {
-        data: data,
-        users: users,
-        code: _counter
-    };
+export async function assignDuel(req, res) {
+    const { referenceNo, duelId, duelData, tokens, serverName } = req.body;
 
-    let serverIndex = 0;
-    // if (_counter % 2 == 0) {
-    //     serverIndex = 1;
-    // }
+    const isAssigned = await Api.getOne(SERVER_INFO_BUCKET, { reference_no: referenceNo });
+    if (isAssigned) {
+        return res.status(200).send({ canContinue: false })
+    }
 
-    let server = MATCH_SERVERS[serverIndex].title;
-    let api_key = MATCH_SERVERS[serverIndex].api_key;
-
-    let url = `https://${server}.hq.spicaengine.com/api/fn-execute/checkAvailability`;
-
-    const headers = {
-        Authorization: `APIKEY ${api_key}`,
-        "Content-Type": "application/json"
-    };
-
-    let serverRes;
     try {
-        serverRes = await Api.httpRequest('post', url, postData, headers);
+        await insertServerInfo(duelData, duelId, tokens, referenceNo, serverName)
+        return res.status(200).send({ canContinue: true })
     } catch (err) {
-        console.log(`AXIOS ERR: code: ${_tempCounter} ------`, server, 'ERR: ', err)
-        return;
+        return res.status(200).send({ canContinue: false })
     }
+}
 
-    if (serverRes && serverRes.status != 200) {
-        console.log("serverRes: ", serverRes)
-    }
+function insertServerInfo(duelData, duelId, tokens, referenceNo, serverName) {
+    console.log("duelData: ", duelData)
+    const insertedObj = {
+        duel_id: duelId,
+        match_server: serverName,
+        user1: duelData["user1"],
+        user1_token: tokens[0],
+        user2: duelData["user2"],
+        user2_token: tokens[1] || "",
+        available_to_user_1: true,
+        available_to_user_2: true,
+        created_at: new Date(),
+        user1_ready: false,
+        user2_ready: tokens[1] ? false : true,
+        reference_no: referenceNo
+    };
 
-    if (serverRes && serverRes.data.tokens && serverRes.data.tokens[0]) {
-        let insertedObj = {
-            duel_id: serverRes.data.duel_id,
-            match_server: server,
-            user1: data["user1"],
-            user1_token: serverRes.data.tokens[0],
-            user2: data["user2"],
-            user2_token: serverRes.data.tokens[1] || "",
-            available_to_user_1: true,
-            available_to_user_2: true,
-            created_at: new Date(),
-            user1_ready: false,
-            user2_ready: serverRes.data.tokens[1] ? false : true
-        };
-
-        await Api.insertOne(SERVER_INFO_BUCKET, insertedObj)
-    }
+    return Api.insertOne(SERVER_INFO_BUCKET, insertedObj).catch(err => console.log(err))
 }

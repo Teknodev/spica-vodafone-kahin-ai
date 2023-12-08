@@ -1,15 +1,13 @@
 import * as Api from "../../63b57559ebfd83002c5defe5/.build";
-import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
+import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
-const USER_BUCKET = Environment.env.BUCKET.USER;
-const CHARGE_BUCKET = Environment.env.BUCKET.CHARGE;
-const REWARD_BUCKET = Environment.env.BUCKET.REWARD;
-const PAST_MATCH_BUCKET = Environment.env.BUCKET.PAST_MATCH;
-const BUGGED_REWARD_BUCKET = Environment.env.BUCKET.BUGGED_REWARD;
-const PLAY_COUNT_LOG_BUCKET = Environment.env.BUCKET.PLAY_COUNT_LOG;
-const MANUALLY_REWARD_BUCKET = Environment.env.BUCKET.MANUALLY_REWARD;
+const USER_BUCKET = VARIABLE.BUCKET.USER;
+const REWARD_BUCKET = VARIABLE.BUCKET.REWARD;
+const PAST_MATCH_BUCKET = VARIABLE.BUCKET.PAST_MATCH;
+const BUGGED_REWARD_BUCKET = VARIABLE.BUCKET.BUGGED_REWARD;
+const MANUALLY_REWARD_BUCKET = VARIABLE.BUCKET.MANUALLY_REWARD;
 
-const OFFER_ID_1GB = Environment.env.TCELL.OFFER_ID_1GB;
+const OFFER_ID_1GB = VARIABLE.TCELL.OFFER_ID_1GB;
 
 export async function checkReward() {
     await retryTcellIssues().catch(err => console.log("ERROR 13", err));

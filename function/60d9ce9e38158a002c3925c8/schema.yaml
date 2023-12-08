@@ -9,20 +9,21 @@ triggers:
       timezone: Europe/Istanbul
       frequency: 0 7 * * *
     type: schedule
-    active: true
+    active: false
   executeReportWeekly:
     options:
       timezone: Europe/Istanbul
       frequency: 5 7 * * 1
     type: schedule
-    active: true
+    active: false
   executeReportMonthly:
     options:
       timezone: Europe/Istanbul
       frequency: 5 7 1 * *
     type: schedule
-    active: true
+    active: false
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
-order: 21
+order: 15
+category: Operation

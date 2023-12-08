@@ -33,5 +33,5 @@ properties:
 acl:
   write: true==true
   read: true==true
-order: 21
+order: 20
 category: Logs

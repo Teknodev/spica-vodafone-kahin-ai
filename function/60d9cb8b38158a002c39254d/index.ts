@@ -1,54 +1,26 @@
 import * as Api from "../../63b57559ebfd83002c5defe5/.build";
-import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
 import * as Helper from "../../633bf949956545002c9b7e31/.build";
+import * as PmpEncryptDecrypt from "../../655cc56fc250ea002c78410f/.build";
+import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
-const USER_POLICY = Environment.env.USER_POLICY;
-const USER_BUCKET = Environment.env.BUCKET.USER;
-const PASSWORD_SALT = Environment.env.PASSWORD_SALT;
+const USER_POLICY = VARIABLE.USER_POLICY;
+const USER_BUCKET = VARIABLE.BUCKET.USER;
+const PASSWORD_SALT = VARIABLE.PASSWORD_SALT;
 
-export async function fastLogin(req, res) {
-    const db = await Api.useDatabase();
-    const { no } = req.body;
+export async function login(req, res) {
+    const { token } = req.body;
 
-    if (!no) {
-        return res.status(400).send({ message: "Msisdn is required." });
+    if (!token) {
+        return res.status(400).send({ message: "Token is required." });
     }
 
-    let identifier = no;
-    let password = PASSWORD_SALT;
-    let msisdn = no;
+    const dectyptResult = PmpEncryptDecrypt.decryptToken(token);
 
     let identityData;
     try {
-        identityData = await getIdentityToken(identifier, password)
+        identityData = await getIdentityToken(dectyptResult.msisdn)
     } catch (err) {
-        const identityCollection = db.collection(`identity`);
-        const userIdentity = await identityCollection
-            .findOne({ "attributes.msisdn": msisdn })
-            .catch(err => console.log("ERROR 8", err));
-
-        if (!userIdentity) {
-            return res.status(400).send({ message: "User is not found" });
-        }
-
-        await identityCollection
-            .updateOne(
-                { _id: userIdentity._id },
-                { $set: { identifier: identifier } }
-            )
-            .catch(err => console.log("ERROR 8", err));
-
-        const user = await Api.getOne(USER_BUCKET, { identity: String(userIdentity._id) })
-            .catch(err => console.log("ERROR 2", err));
-
-        const newIdentityData = await getIdentityToken(identifier, password)
-        if (newIdentityData) {
-            return res.status(400).send({ message: "User is not found" });
-        }
-        return res.status(200).send({
-            token: data.token,
-            user: user
-        });
+        return res.status(400).send({ message: "User is not found" });
     }
 
     if (!identityData) {
@@ -62,18 +34,24 @@ export async function fastLogin(req, res) {
 
     return res.status(200).send({
         token: identityData.token,
-        user: user
+        user: user,
+        vodafoneToken: dectyptResult.token
     });
 }
 
-export async function fastRegister(req, res) {
-    const { msisdn } = req.body;
+export async function register(req, res) {
+    const { token } = req.body;
 
-    if (!msisdn) {
-        return res.status(400).send({ message: "Msisdn is required." });
+    if (!token) {
+        return res.status(400).send({ message: "Token is required." });
     }
 
-    const identityData = await createIdentity(msisdn, PASSWORD_SALT, msisdn)
+    const dectyptResult = PmpEncryptDecrypt.decryptToken(token);
+
+    const msisdn = dectyptResult.msisdn;
+    const identifier = dectyptResult.msisdn;
+
+    const identityData = await createIdentity(identifier, msisdn)
         .catch(error => {
             if (error.message != 'Identity already exists.') {
                 console.log("ERORR", error)
@@ -91,11 +69,11 @@ export async function fastRegister(req, res) {
         avatar_id: 0,
         created_at: new Date(),
         total_point: 0,
-        weekly_point: 0,
+        range_point: 0,
         win_count: 0,
         lose_count: 0,
         total_award: 0,
-        weekly_award: 0,
+        range_award: 0,
         available_play_count: 0,
         bot: false,
         perm_accept: false,
@@ -111,17 +89,18 @@ export async function fastRegister(req, res) {
     }
 
     const user = insertedObject.ops[0];
-    const indentityToken = await getIdentityToken(msisdn, PASSWORD_SALT).catch(console.error)
+    const indentityToken = await getIdentityToken(msisdn).catch(console.error)
     return res.status(200).send({
         token: indentityToken.token,
-        user: user
+        user: user,
+        vodafoneToken: dectyptResult.token
     });
 }
 
-function getIdentityToken(identifier, password) {
+function getIdentityToken(identifier) {
     const Identity = Api.useIdentity();
     return new Promise(async (resolve, reject) => {
-        await Identity.login(identifier, password)
+        await Identity.login(identifier, PASSWORD_SALT)
             .then(data => {
                 resolve({ token: data });
             })
@@ -131,12 +110,12 @@ function getIdentityToken(identifier, password) {
     });
 }
 
-function createIdentity(identifier, password, msisdn) {
+function createIdentity(identifier, msisdn) {
     const Identity = Api.useIdentity();
     return new Promise(async (resolve, reject) => {
         await Identity.insert({
             identifier: identifier,
-            password: password,
+            password: PASSWORD_SALT,
             policies: [`${USER_POLICY}`],
             attributes: { msisdn }
         })
@@ -150,10 +129,9 @@ function createIdentity(identifier, password, msisdn) {
     });
 }
 
-export async function fastUserUpdate(req, res) {
-    const { identity, name, avatar_id } = req.body;
+export async function userUpdate(req, res) {
+    const { token, identity, name, avatar_id } = req.body;
 
-    const token = Helper.getTokenByReq(req);
     const decodedToken = await Helper.getDecodedToken(token)
     if (!decodedToken) {
         return res.status(400).send({ message: "Token is not verified." });
@@ -164,4 +142,8 @@ export async function fastUserUpdate(req, res) {
     }).catch(err => console.log("ERROR 2 ", err))
 
     return res.status(200).send({ message: "User updated successful" });
+}
+
+export function getRedirectURL() {
+    return PmpEncryptDecrypt.getRedirectURL();
 }

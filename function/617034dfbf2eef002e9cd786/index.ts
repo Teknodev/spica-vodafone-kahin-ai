@@ -1,10 +1,10 @@
 import * as Api from "../../63b57559ebfd83002c5defe5/.build";
-import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
+import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
 import fetch from 'node-fetch';
 const crypto = require("crypto");
 
-const DRAW_LOG_BUCKET = Environment.env.BUCKET.DRAW_LOG;
+const DRAW_LOG_BUCKET = VARIABLE.BUCKET.DRAW_LOG;
 const OFFER_ID = 4689;
 
 export async function sendChargeRequest(change) {

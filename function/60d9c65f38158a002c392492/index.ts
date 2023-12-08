@@ -1,129 +1,150 @@
 import * as Api from "../../63b57559ebfd83002c5defe5/.build";
-import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
+import * as Helper from "../../633bf949956545002c9b7e31/.build";
+import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
-const USER_POLICY = Environment.env.USER_POLICY;
-const USER_BUCKET = Environment.env.BUCKET.USER;
+const USER_POLICY = VARIABLE.USER_POLICY;
+const USER_BUCKET = VARIABLE.BUCKET.USER;
+const PASSWORD_SALT = VARIABLE.PASSWORD_SALT;
 
-export async function register(req, res) {
-    console.log("@observer::register");
-    let { mobile_number, name, avatar_id } = req.body;
+export async function testLogin(req, res) {
+    const { token } = req.body;
 
-    // mobile_number = '5354513344';
+    if (!token) {
+        return res.status(400).send({ message: "Token is required." });
+    }
 
-    await createIdentity(mobile_number, createPassword(mobile_number))
-        .then(async dataIdentity => {
-            await addToUserBucket(dataIdentity.identity_id, name, avatar_id)
-                .then(data => {
-                    return res
-                        .status(200)
-                        .send({ message: "User registered successfully!", data: data });
-                })
-                .catch(error => {
-                    return res.status(400).send({
-                        message: "User added to identity. Error while adding User bucket",
-                        error: error
-                    });
+    const dectyptResult = {
+        msisdn: String(Math.round(Math.random() * 1000 + 1000)),
+        token: "ad23az342asd23qdwasd32r23da"
+    }
+
+    let identityData;
+    try {
+        identityData = await getIdentityToken(dectyptResult.msisdn)
+    } catch (err) {
+        return res.status(400).send({ message: "User is not found" });
+    }
+
+    if (!identityData) {
+        return res.status(400).send({ message: "User is not found" });
+    }
+
+    const decodedToken = await Helper.getDecodedToken(identityData.token)
+
+    const user = await Api.getOne(USER_BUCKET, { identity: String(decodedToken._id) })
+        .catch(err => console.log("ERROR 2", err));
+
+    return res.status(200).send({
+        token: identityData.token,
+        user: user,
+        vodafoneToken: dectyptResult.token
+    });
+}
+
+export async function testRegister(req, res) {
+    const { token } = req.body;
+
+    if (!token) {
+        return res.status(400).send({ message: "Token is required." });
+    }
+
+    const dectyptResult = {
+        msisdn: String(Math.round(Math.random() * 1000 + 1000)),
+        token: "ad23az342asd23qdwasd32r23da"
+    }
+
+    const msisdn = dectyptResult.msisdn;
+    const identifier = dectyptResult.msisdn;
+
+    const identityData = await createIdentity(identifier, msisdn)
+        .catch(error => {
+            if (error.message != 'Identity already exists.') {
+                console.log("ERORR", error)
+            }
+            return res
+                .status(400)
+                .send({
+                    message: "Error while creating identity",
+                    error: error
                 });
-        })
-        .catch(error => {
-            return res.status(400).send({
-                message: "Error while adding new Identity.",
-                error: error
-            });
         });
+
+    const insertedObject = await Api.insertOne(USER_BUCKET, {
+        identity: identityData.identity_id,
+        avatar_id: 0,
+        created_at: new Date(),
+        total_point: 0,
+        range_point: 0,
+        win_count: 0,
+        lose_count: 0,
+        total_award: 0,
+        range_award: 0,
+        available_play_count: 100,
+        bot: false,
+        perm_accept: false,
+        free_play: false
+    }).catch(console.error)
+
+    if (!insertedObject) {
+        return res.status(400).send({
+            message:
+                "Error while adding user to User Bucket (Identity already added).",
+            error: error
+        });
+    }
+
+    const user = insertedObject.ops[0];
+    const indentityToken = await getIdentityToken(msisdn).catch(console.error)
+    return res.status(200).send({
+        token: indentityToken.token,
+        user: user,
+        vodafoneToken: dectyptResult.token
+    });
 }
 
-export async function login(req, res) {
-    console.log("@observer::login");
-    let { mobile_number } = req.body;
-    // mobile_number = '5354513344';
-
-    await getIdentityToken(mobile_number, createPassword(mobile_number))
-        .then(data => {
-            return res.status(200).send(data);
-        })
-        .catch(error => {
-            return res.status(400).send(error);
-        });
-}
-
-async function getIdentityToken(mobile_number, password) {
+function getIdentityToken(identifier) {
     const Identity = Api.useIdentity();
-
     return new Promise(async (resolve, reject) => {
-        await Identity.login(mobile_number, password)
+        await Identity.login(identifier, PASSWORD_SALT)
             .then(data => {
                 resolve({ token: data });
             })
             .catch(error => {
-                console.log("--ERROR WHILE GETTING TOKEN");
-                reject({ error: error });
-            });
-    });
-}
-
-// -identity operation
-async function createIdentity(mobile_number, password) {
-    const Identity = Api.useIdentity();
-
-    let msisdn = msisdnGenerate(10);
-    // msisdn = '5354513344';
-
-    return new Promise(async (resolve, reject) => {
-        await Identity.insert({
-            identifier: mobile_number,
-            password: password,
-            policies: [`${USER_POLICY}`],
-            // attributes: {}
-            attributes: { msisdn: msisdn }
-        })
-            .then(identity => {
-                resolve({ identity_id: identity._id, msisdn: msisdn });
-            })
-            .catch(error => {
-                console.log("--ERROR WHILE CREATING IDENTITY: ", error);
-                reject({ error: error });
-            });
-    });
-}
-
-function msisdnGenerate(length) {
-    let result = "";
-    let characters = "0123456789";
-    let charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
-}
-
-async function addToUserBucket(identity_id, name, avatar_id) {
-    const Bucket = Api.useBucket();
-
-    return new Promise(async (resolve, reject) => {
-        await Bucket.data
-            .insert(`${USER_BUCKET}`, {
-                identity: identity_id,
-                name: name,
-                avatar_id: avatar_id,
-                total_point: 0,
-                weekly_point: 0,
-                win_count: 0,
-                lose_count: 0,
-                total_award: 0,
-                weekly_award: 0
-            })
-            .then(data => {
-                resolve(data);
-            })
-            .catch(error => {
-                console.log("--ERROR WHILE ADDING USER BUCKET: ", error);
                 reject(error);
             });
     });
 }
 
-function createPassword(text) {
-    let password = "a-" + text + "-a";
-    return password;
+function createIdentity(identifier, msisdn) {
+    const Identity = Api.useIdentity();
+    return new Promise(async (resolve, reject) => {
+        await Identity.insert({
+            identifier: identifier,
+            password: PASSWORD_SALT,
+            policies: [`${USER_POLICY}`],
+            attributes: { msisdn }
+        })
+            .then(identity => {
+                resolve({ identity_id: identity._id });
+            })
+            .catch(error => {
+                console.log("ERROR 7", error);
+                reject(error);
+            });
+    });
+}
+
+export async function testUserUpdate(req, res) {
+    const { token, identity, name, avatar_id } = req.body;
+
+    const decodedToken = await Helper.getDecodedToken(token)
+    if (!decodedToken) {
+        return res.status(400).send({ message: "Token is not verified." });
+    }
+
+    await Api.updateOne(USER_BUCKET, { identity: identity }, {
+        $set: { name: name, avatar_id: avatar_id }
+    }).catch(err => console.log("ERROR 2 ", err))
+
+    return res.status(200).send({ message: "User updated successful" });
 }

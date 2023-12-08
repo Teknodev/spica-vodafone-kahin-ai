@@ -41,13 +41,12 @@ properties:
     options:
       position: bottom
     default: 0
-  weekly_point:
+  range_point:
     type: number
-    title: weekly_point
-    description: Description of the weekly_point input
+    title: range_point
+    description: Description of the range_point input
     options:
       position: bottom
-      index: true
     default: 0
   win_count:
     type: number
@@ -93,12 +92,13 @@ properties:
       position: bottom
     default: 0
     minimum: 0
-  weekly_award:
+  range_award:
     type: number
-    title: weekly_award
-    description: Description of the weekly_award input
+    title: range_award
+    description: Description of the range_award input
     options:
       position: bottom
+    default: 0
   avatar_id:
     type: number
     title: avatar_id
@@ -112,10 +112,53 @@ properties:
     description: Description of the note input
     options:
       position: bottom
+  subscription_status:
+    type: string
+    title: subscription_status
+    description: Description of the subscription_status input
+    options:
+      position: bottom
+    enum:
+      - active
+      - suspended
+      - inactive
+      - deactivated
+    default: inactive
+  subscription_start_date:
+    type: date
+    title: subscription_start_date
+    description: Description of the subscription_start_date input
+    options:
+      position: bottom
+  subscription_next_renewal_date:
+    type: date
+    title: subscription_next_renewal_date
+    description: Description of the subscription_next_renewal_date input
+    options:
+      position: bottom
+  subscription_last_renewal_date:
+    type: date
+    title: subscription_last_renewal_date
+    description: Description of the subscription_last_renewal_date input
+    options:
+      position: bottom
+  subscription_end_date:
+    type: date
+    title: subscription_end_date
+    description: Description of the subscription_end_date input
+    options:
+      position: bottom
+  range_reward_count:
+    type: number
+    title: range_reward_count
+    description: Description of the range_reward_count input
+    options:
+      position: bottom
+    default: -2
 acl:
   write: |-
     auth.attributes.role == "admin" ||
     auth.key == "406bus18l2yiufdq"
   read: true==true
 required: []
-order: 22
+order: 25

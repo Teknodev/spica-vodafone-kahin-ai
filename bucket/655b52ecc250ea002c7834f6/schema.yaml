@@ -1,0 +1,31 @@
+_id: 655b52ecc250ea002c7834f6
+title: Server Configuration
+description: Describe your new bucket
+icon: view_stream
+primary: key
+readOnly: false
+history: false
+properties:
+  key:
+    type: string
+    title: key
+    description: Description of the key input
+    options:
+      position: bottom
+  value:
+    type: string
+    title: value
+    description: Description of the value input
+    options:
+      position: bottom
+  duel_id:
+    type: string
+    title: duel_id
+    description: Description of the duel_id input
+    options:
+      position: bottom
+acl:
+  write: true==true
+  read: true==true
+order: 24
+category: Server

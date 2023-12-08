@@ -1,9 +1,9 @@
 import * as Api from "../../63b57559ebfd83002c5defe5/.build";
-import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
+import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
-const REWARD_BUCKET = Environment.env.BUCKET.REWARD;
-const CHARGE_BUCKET = Environment.env.BUCKET.CHARGE;
-const BUGGED_REWARD_BUCKET = Environment.env.BUCKET.BUGGED_REWARD;
+const REWARD_BUCKET = VARIABLE.BUCKET.REWARD;
+const CHARGE_BUCKET = VARIABLE.BUCKET.CHARGE;
+const BUGGED_REWARD_BUCKET = VARIABLE.BUCKET.BUGGED_REWARD;
 
 import jsdom from "jsdom";
 import convert from "xml-js";

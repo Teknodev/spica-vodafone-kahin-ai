@@ -1,15 +1,16 @@
-_id: 63e4cd55130d55002c1a49cd
-name: BiP Message Service
+_id: 655b40e8c250ea002c783322
+name: Server Environment Variables
 language: javascript
-timeout: 58.1
+timeout: 60
 triggers:
   default:
     type: http
-    active: true
+    active: false
     options:
       method: Get
       path: /
       preflight: true
 env: {}
 memoryLimit: 100
-order: 25
+order: 9
+category: Server

@@ -1,10 +1,10 @@
 import * as Api from "../../63b57559ebfd83002c5defe5/.build";
 import * as User from "../../63b6a403ebfd83002c5e104e/.build";
 import * as Helper from "../../633bf949956545002c9b7e31/.build";
-import * as Environment from "../../63b57e98ebfd83002c5df0c5/.build";
+import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
-const SERVER_INFO_BUCKET = Environment.env.BUCKET.SERVER_INFO;
-const OPERATION_KEY = Environment.env.OPERATION_KEY;
+const SERVER_INFO_BUCKET = VARIABLE.BUCKET.SERVER_INFO;
+const OPERATION_KEY = VARIABLE.OPERATION_KEY;
 
 export async function setReadyMainServer(req, res) {
     const { userId, duelId, key } = req.body;
@@ -18,10 +18,11 @@ export async function setReadyMainServer(req, res) {
 }
 
 export async function serverInfoUpdate(req, res) {
-    const { userId, duelId, key } = req.body;
+    const { token, userId, duelId } = req.body;
 
-    if (key != OPERATION_KEY) {
-        return res.status(400).send({ message: "No access" });
+    const decodedToken = await Helper.getDecodedToken(token)
+    if (!decodedToken) {
+        return res.status(400).send({ message: "Token is not verified." });
     }
 
     await changeServerAvailabilityToUser(userId, duelId, "infoupdate");
@@ -29,7 +30,12 @@ export async function serverInfoUpdate(req, res) {
 }
 
 export async function playCountDecrease(req, res) {
-    const { userId } = req.body;
+    const { token, userId } = req.body;
+
+    const decodedToken = await Helper.getDecodedToken(token)
+    if (!decodedToken) {
+        return res.status(400).send({ message: "Token is not verified." });
+    }
 
     const user = await User.getOne({ _id: Api.toObjectId(userId) })
 
@@ -47,9 +53,8 @@ export async function playCountDecrease(req, res) {
 }
 
 export async function changeAvatar(req, res) {
-    const { userId, avatarId } = req.body;
+    const { token, userId, avatarId } = req.body;
 
-    const token = Helper.getTokenByReq(req);
     const decodedToken = await Helper.getDecodedToken(token)
     if (!decodedToken) {
         return res.status(400).send({ message: "Token is not verified." });
@@ -61,9 +66,8 @@ export async function changeAvatar(req, res) {
 }
 
 export async function changeName(req, res) {
-    const { userId, name } = req.body;
+    const { token, userId, name } = req.body;
 
-    const token = Helper.getTokenByReq(req);
     const decodedToken = await Helper.getDecodedToken(token)
     if (!decodedToken) {
         return res.status(400).send({ message: "Token is not verified." });

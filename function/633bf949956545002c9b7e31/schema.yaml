@@ -16,13 +16,6 @@ triggers:
       preflight: true
     type: http
     active: true
-  getAbusiveNames:
-    options:
-      method: Get
-      path: /getAbusiveNames
-      preflight: true
-    type: http
-    active: true
   getMyIp:
     options:
       method: Get
