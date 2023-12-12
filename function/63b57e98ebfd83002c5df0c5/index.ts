@@ -33,6 +33,7 @@ export const env = {
         CONFIGURATION: "6067935ee9960e002c27877f",
         SERVER_INFO: "63e21f14130d55002c19fe95",
         NOTIFICATION_LOG: "656727a0c250ea002c79534d",
+        CONTACT_MESSAGE: "65781505c250ea002c7b92cc"
     },
     MAILER: {
         SMTP_USER: "noreply@spicaengine.com",

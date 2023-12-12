@@ -1,0 +1,14 @@
+_id: 657816a1c250ea002c7b9338
+name: Adding msisdn to Contact Message
+language: javascript
+timeout: 126.3
+triggers:
+  onContactMessageInserted:
+    options:
+      bucket: 65781505c250ea002c7b92cc
+      type: INSERT
+    type: bucket
+    active: true
+env:
+  NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
+memoryLimit: 100
