@@ -40,6 +40,12 @@ properties:
     description: Description of the txn_id input
     options:
       position: bottom
+  status_code:
+    type: number
+    title: status_code
+    description: Description of the status_code input
+    options:
+      position: bottom
 acl:
   write: true==true
   read: true==true

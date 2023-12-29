@@ -9,19 +9,5 @@ triggers:
     options:
       timezone: UTC
       frequency: "*/15 * * * * *"
-  testProcessPid:
-    options:
-      method: Get
-      path: /testProcessPid
-      preflight: true
-    type: http
-    active: true
-  installPs:
-    options:
-      method: Get
-      path: /installPs
-      preflight: true
-    type: http
-    active: true
 env: {}
 memoryLimit: 100

@@ -1,0 +1,32 @@
+_id: 658ed1d09b88fb002b2be3f6
+name: System
+language: javascript
+timeout: 60.8
+triggers:
+  systemReady:
+    type: system
+    active: true
+    options:
+      name: READY
+  clearPs:
+    options:
+      timezone: UTC
+      frequency: 0 */3 * * *
+    type: schedule
+    active: true
+  listPs:
+    options:
+      method: Get
+      path: /listPs
+      preflight: true
+    type: http
+    active: true
+  installPs:
+    options:
+      method: Get
+      path: /installPsPs
+      preflight: true
+    type: http
+    active: true
+env: {}
+memoryLimit: 100

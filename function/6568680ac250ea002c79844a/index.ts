@@ -1,11 +1,10 @@
 import * as Api from "../../63b57559ebfd83002c5defe5/.build";
 import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
-import psList from 'ps-list';
-
 const REWARD_BUCKET = VARIABLE.BUCKET.REWARD;
 const REWARD_QUEUE_BUCKET = VARIABLE.BUCKET.REWARD_QUEUE;
 const TELNET_REQ_RES_BUCKET = VARIABLE.BUCKET.TELNET_REQ_RES;
+const PROCESS_BUCKET = VARIABLE.BUCKET.PROCESS;
 
 let terminal;
 const REASON_CODE = 16549;
@@ -42,8 +41,7 @@ export async function setReward() {
             })
 
             sendMessage(`{ echo "dload ${reward.txn_id} ${REASON_CODE} ${reward.msisdn} 3:5:3221225472"; sleep 1; } | telnet ${HOST} ${PORT} \n`)
-            // `{ echo "dload ${reward.txn_id} ${REASON_CODE} ${reward.msisdn} 3:5:3221225472"; sleep 1; } | telnet ${HOST} ${PORT} \n`
-            // `{ echo "info ${reward.msisdn}"; sleep 1; } | telnet ${HOST} ${PORT} \n`
+            // sendMessage(`{ echo "info ${reward.msisdn}"; sleep 1; } | telnet ${HOST} ${PORT} \n`)
         }
 
     } catch (err) {
@@ -64,6 +62,8 @@ export async function createChildProcess() {
     terminal.on('exit', function (code) {
         console.log('child process exited with code ' + code);
     });
+
+    insertPid();
 }
 
 function sendMessage(message) {
@@ -107,7 +107,8 @@ async function handleDload(message, resCode) {
     updateRewardLogByTxnId(txnId, {
         user_text: userText,
         date,
-        status: resCode == RESULT_CODE.SUCCESS
+        status: resCode == RESULT_CODE.SUCCESS,
+        status_code: Number(resCode)
     })
 
     removeRewardQueueByTxnId(txnId)
@@ -148,6 +149,7 @@ const TXN_NO = {
 
 const RESULT_CODE = {
     "SUCCESS": 0,
+    "SYSTEM_ERROR": 3
 }
 
 function parseInput(input) {
@@ -161,46 +163,10 @@ function convertToDate(inputDate) {
     return `${inputDate.slice(0, 4)}-${inputDate.slice(4, 6)}-${inputDate.slice(6, 8)}`;
 }
 
-export async function testProcessPid() {
-    // terminal = require('child_process').spawn('bash');
+function insertPid() {
+    const pid = terminal.pid;
+    if (!pid) return;
 
-    // console.log('Terminal PID:', terminal.pid);
-
-    // terminal.on('exit', (code, signal) => {
-    //     console.log(`Terminal process exited with code ${code} and signal ${signal}`);
-    // });
-
-    // setTimeout(() => {
-    //      terminal.stdin.end();
-    // }, 1000)
-
-    try {
-        console.log(await psList());
-
-    } catch (error) {
-        console.error('Error listing terminals:', error);
-    }
-
-    return "ok"
-}
-
-
-export async function installPs() {
-    const script = `
-            sudo apt-get install procps
-        `;
-
-    const scriptPath = "/tmp/sendtelnetmessage.sh";
-    fs.writeFileSync(scriptPath, script);
-    fs.chmodSync(scriptPath, "755");
-    const output = cp.spawnSync(scriptPath, [], {
-        env: {},
-        stdio: ["ignore", "inherit", "inherit"]
-    });
-
-    console.log(output)
-
-    console.log("finished");
-
-    return "ok"
+    const Bucket = Api.useBucket();
+    Bucket.data.insert(PROCESS_BUCKET, { pid, name: 'bash' }).catch(console.error);
 }
