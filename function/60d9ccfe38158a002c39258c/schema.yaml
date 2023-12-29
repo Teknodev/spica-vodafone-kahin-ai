@@ -4,25 +4,12 @@ description: Adds new available play for the user
 language: javascript
 timeout: 60
 triggers:
-  getWinner:
-    options:
-      collection: bucket_60742ed3f95e39002c4917ae
-      type: INSERT
-    type: database
-    active: true
   applyRewardManually:
     options:
       bucket: 60aa13679835cd002c1c9a1a
       type: INSERT
     type: bucket
-    active: true
-  chargeRequest:
-    options:
-      method: Get
-      path: /chargeRequest
-      preflight: true
-    type: http
-    active: true
+    active: false
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100

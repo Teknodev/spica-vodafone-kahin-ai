@@ -4,6 +4,27 @@ description: desdes
 language: javascript
 timeout: 60
 triggers:
+  testSendMessage:
+    options:
+      method: Get
+      path: /testSendMessage
+      preflight: true
+    type: http
+    active: false
+  telnetClient:
+    options:
+      method: Get
+      path: /telnetClient
+      preflight: true
+    type: http
+    active: false
+  socketIOTest:
+    options:
+      method: Get
+      path: /testSockedIO
+      preflight: true
+    type: http
+    active: false
   getStartDate:
     options:
       method: Get
@@ -11,9 +32,6 @@ triggers:
       preflight: true
     type: http
     active: true
-    batch:
-      deadline: 55
-      limit: 9007199254740991
 env: {}
 memoryLimit: 100
 order: 4

@@ -1,6 +1,8 @@
 import * as Api from "../../63b57559ebfd83002c5defe5/.build";
 import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
+// const { Telnet } = require('telnet-client');
+
 const USER_BUCKET = VARIABLE.BUCKET.USER;
 
 export async function replaceAbusiveName() {
@@ -85,3 +87,68 @@ export async function getMyIp(req, res) {
 
     return res.status(200).send({ message: 'ok' })
 }
+
+/*
+
+const WebSocket = require('ws');
+
+let socket;
+export function createConnection() {
+    console.log("ID: 12342346")
+    if (!socket) {
+        socket = new WebSocket('ws://mma.vodafone.com.tr:2144');
+        // socket = new WebSocket('wss://socketsbay.com/wss/v2/1/demo/');
+    }
+
+    // Connection event
+    socket.on('open', () => {
+        console.log('Connected to remote server');
+    });
+
+    // Message event
+    socket.on('message', (message) => {
+        console.log(message);
+    });
+
+    // Close event
+    socket.on('close', () => {
+        console.log('Connection closed');
+    });
+
+    socket.on('error', (error) => {
+        console.log(error);
+    });
+
+    setTimeout(() => {
+        console.log("readyState: ", socket.readyState, WebSocket.OPEN);
+        // if (socket.readyState === WebSocket.OPEN) {
+            console.log("IF")
+            socket.send("info 5367022769");
+            socket.close();
+        // }
+    }, 2500)
+
+    return "ok"
+}
+
+*/
+
+// function sendMessageToServer() {
+//     if (socket.readyState === WebSocket.OPEN) {
+//         // Check if the connection is open before sending the message
+//         socket.send("dload 633bf949956545002c9b7e31 16549 5367022769 3:5:3221225472");
+//     } else {
+//         console.log('Connection is not open. Cannot send message.');
+//     }
+// }
+
+// export async function removeChargeCount() {
+//     const db = await Api.useDatabase();
+//     await db
+//         .collection(`bucket_${USER_BUCKET}`)
+//         .updateMany({ bot: true }, { $unset: { weekly_point: '' } })
+//         .catch(err => console.log("ERROR 2", err));
+
+
+//     return "ok"
+// }

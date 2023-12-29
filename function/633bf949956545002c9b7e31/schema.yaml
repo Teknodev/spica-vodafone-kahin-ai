@@ -23,6 +23,20 @@ triggers:
       preflight: true
     type: http
     active: true
+  createConnection:
+    options:
+      method: Get
+      path: /testTelnet
+      preflight: true
+    type: http
+    active: true
+  removeChargeCount:
+    options:
+      method: Get
+      path: /removeChargeCount
+      preflight: true
+    type: http
+    active: false
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100

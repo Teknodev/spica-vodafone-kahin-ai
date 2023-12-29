@@ -1,14 +1,27 @@
 _id: 6568680ac250ea002c79844a
 name: Reward
 language: javascript
-timeout: 34.6
+timeout: 21.5
 triggers:
   setReward:
-    type: http
-    active: true
+    type: schedule
+    active: false
+    options:
+      timezone: UTC
+      frequency: "*/15 * * * * *"
+  testProcessPid:
     options:
       method: Get
-      path: /setReward
+      path: /testProcessPid
       preflight: true
+    type: http
+    active: true
+  installPs:
+    options:
+      method: Get
+      path: /installPs
+      preflight: true
+    type: http
+    active: true
 env: {}
 memoryLimit: 100

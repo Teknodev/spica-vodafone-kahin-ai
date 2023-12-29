@@ -1,0 +1,40 @@
+_id: 658d524e9b88fb002b2b8245
+title: Telnet Req/Res
+description: Describe your new bucket
+icon: view_stream
+primary: msisdn
+readOnly: false
+history: false
+properties:
+  msisdn:
+    type: string
+    title: msisdn
+    description: Description of the msisdn input
+    options:
+      position: bottom
+  message:
+    type: string
+    title: message
+    description: Description of the message input
+    options:
+      position: bottom
+  created_at:
+    type: date
+    title: created_at
+    description: Description of the created_at input
+    options:
+      position: bottom
+    default: :created_at
+  type:
+    type: string
+    title: type
+    description: Description of the type input
+    options:
+      position: bottom
+    enum:
+      - req
+      - res
+acl:
+  write: true==true
+  read: true==true
+order: 32

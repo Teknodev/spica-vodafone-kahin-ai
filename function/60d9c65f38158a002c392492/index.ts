@@ -135,7 +135,7 @@ function createIdentity(identifier, msisdn) {
 }
 
 export async function testUserUpdate(req, res) {
-    const { token, identity, name, avatar_id } = req.body;
+    const { token, identity, name, avatarId } = req.body;
 
     const decodedToken = await Helper.getDecodedToken(token)
     if (!decodedToken) {
@@ -143,7 +143,7 @@ export async function testUserUpdate(req, res) {
     }
 
     await Api.updateOne(USER_BUCKET, { identity: identity }, {
-        $set: { name: name, avatar_id: avatar_id }
+        $set: { name: name, avatar_id: avatarId }
     }).catch(err => console.log("ERROR 2 ", err))
 
     return res.status(200).send({ message: "User updated successful" });

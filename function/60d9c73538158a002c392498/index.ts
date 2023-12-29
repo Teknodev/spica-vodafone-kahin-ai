@@ -237,7 +237,7 @@ async function requestForANewGame(data) {
     // !TODO should send this request to the message broker
     // https://vodafone.queue.spicaengine.com/message?topic_id=657310d3f1bac9002c940b22
     // https://vodafone-sayi-krali-a4d57.hq.spicaengine.com/api/fn-execute/new-game-listener
-    Api.httpRequest('post', 'https://vodafone-sayi-krali-a4d57.hq.spicaengine.com/api/fn-execute/new-game-listener', {
+    Api.httpRequest('post', 'https://vodafone-s1-6b082.hq.spicaengine.com/api/fn-execute/new-game-listener', {
         "referenceNo": String(Date.now()),
         "service": "sayi_krali",
         "data": data,

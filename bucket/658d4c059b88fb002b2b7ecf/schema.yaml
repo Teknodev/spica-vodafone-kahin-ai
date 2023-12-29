@@ -1,7 +1,7 @@
-_id: 609669f805b0df002ceb2517
-title: Reward Logs
+_id: 658d4c059b88fb002b2b7ecf
+title: Reward Queue
 description: Describe your new bucket
-icon: line_style
+icon: view_stream
 primary: msisdn
 readOnly: false
 history: false
@@ -12,28 +12,25 @@ properties:
     description: Description of the msisdn input
     options:
       position: bottom
-      index: true
-  user_text:
-    type: string
-    title: user_text
-    description: Description of the user_text input
-    options:
-      position: bottom
-  date:
+  created_at:
     type: date
-    title: date
-    description: Description of the date input
+    title: created_at
+    description: Description of the created_at input
     options:
       position: bottom
-      index: true
     default: :created_at
-  status:
-    type: boolean
-    title: status
-    description: Description of the status input
+  next_try_date:
+    type: date
+    title: next_try_date
+    description: Description of the next_try_date input
     options:
       position: bottom
-    default: false
+  last_try_date:
+    type: date
+    title: last_try_date
+    description: Description of the last_try_date input
+    options:
+      position: bottom
   txn_id:
     type: string
     title: txn_id
@@ -43,5 +40,4 @@ properties:
 acl:
   write: true==true
   read: true==true
-order: 16
-category: Logs
+order: 31

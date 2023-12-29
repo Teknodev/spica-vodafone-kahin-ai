@@ -19,6 +19,13 @@ triggers:
       preflight: true
     type: http
     active: true
+  setReward:
+    options:
+      method: Get
+      path: /setRewardsetReward
+      preflight: true
+    type: http
+    active: true
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100

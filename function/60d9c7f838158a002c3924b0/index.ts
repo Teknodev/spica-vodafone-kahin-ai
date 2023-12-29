@@ -5,6 +5,7 @@ import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 const PAST_MATCH_BUCKET = VARIABLE.BUCKET.PAST_MATCH;
 const SERVER_INFO_BUCKET = VARIABLE.BUCKET.SERVER_INFO;
 const OPERATION_KEY = VARIABLE.OPERATION_KEY;
+const REWARD_QUEUE_BUCKET = VARIABLE.BUCKET.REWARD_QUEUE;
 
 export async function insertPastMatchFromServer(req, res) {
     const { duel, key } = req.body;
@@ -75,9 +76,9 @@ function updateUser(userIndex, user, dailyPoint, duel) {
     let rangeRewardCount = user.range_reward_count;
     const totalPoint = parseInt(user.total_point);
     const result = Math.floor(totalPoint + dailyPoint / 1000);
+
     if (result > rangeRewardCount) {
-        // TODO set reward
-        setReward()
+        setReward(user)
         rangeRewardCount += 1;
     }
 
@@ -105,4 +106,21 @@ async function removeServerInfo(duel_id) {
     Api.deleteOne(SERVER_INFO_BUCKET, { duel_id: duel_id })
 }
 
-function setReward(){}
+export async function setReward() {
+    if (!user.identity) return;
+
+    const db = await Api.useDatabase();
+    const identity = await db.collection('identity').findOne({ _id: Api.toObjectId(user.identity) })
+
+    let msisdn = identity.attributes.msisdn;
+    if (msisdn.startsWith("90")) {
+        msisdn = msisdn.substring(2)
+    }
+
+    Api.insertOne(REWARD_QUEUE_BUCKET, {
+        msisdn,
+        created_at: new Date(),
+        next_try_date: new Date(),
+        txn_id: String(Date.now())
+    })
+}

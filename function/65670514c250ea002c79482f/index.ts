@@ -3,6 +3,7 @@ import * as User from "../../63b6a403ebfd83002c5e104e/.build";
 import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
 const NOTIFICATION_LOG_BUCKET = VARIABLE.BUCKET.NOTIFICATION_LOG;
+const REWARD_QUEUE_BUCKET = VARIABLE.BUCKET.REWARD_QUEUE;
 
 const NOTIFICATION = {
     SUBSCRIPTION_CREATED: "SubscriptionCreated",
@@ -41,7 +42,7 @@ export async function serviceListener(req, res) {
 
     insertNotificationLog(body, msisdn);
 
-    const user = await User.getByMsisdn(msisdn); // !TODO Change msisdn
+    const user = await User.getByMsisdn(msisdn);
     if (!user) {
         console.error("USER NOT FOUND: ", msisdn)
         return "ok"
@@ -165,7 +166,18 @@ function nonSubscriptionNotification(body) {
     insertNotificationLog(body, msisdn);
 }
 
-async function setReward() { }
+async function setReward(msisdn) {
+    if (msisdn.startsWith("90")) {
+        msisdn = msisdn.substring(2)
+    }
+
+    Api.insertOne(REWARD_QUEUE_BUCKET, {
+        msisdn,
+        created_at: new Date(),
+        next_try_date: new Date(),
+        txn_id: String(Date.now())
+    })
+}
 
 function insertNotificationLog(body, msisdn) {
     Api.insertOne(NOTIFICATION_LOG_BUCKET, {

@@ -91,6 +91,7 @@ properties:
     description: Description of the reference_no input
     options:
       position: bottom
+      unique: true
 acl:
   write: true==true
   read: true==true
