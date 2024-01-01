@@ -58,7 +58,6 @@ export async function setReward() {
         console.log("err: ", err)
     }
 
-    return "ok"
 }
 
 export async function createChildProcess() {
