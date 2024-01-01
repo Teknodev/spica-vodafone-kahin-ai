@@ -1,13 +1,13 @@
 _id: 6568680ac250ea002c79844a
 name: Reward
 language: javascript
-timeout: 21.5
+timeout: 37
 triggers:
   setReward:
     type: schedule
     active: false
     options:
       timezone: UTC
-      frequency: "*/15 * * * * *"
+      frequency: "*/30 * * * * *"
 env: {}
 memoryLimit: 100

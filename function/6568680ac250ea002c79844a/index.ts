@@ -20,6 +20,7 @@ export async function setReward() {
         terminal.stdin.end();
         terminal = undefined;
         await updateRewardQueueByTxnId();
+        lastTxnDate = undefined;
     }
 
     try {
@@ -56,6 +57,8 @@ export async function setReward() {
     } catch (err) {
         console.log("err: ", err)
     }
+
+    return "ok"
 }
 
 export async function createChildProcess() {
@@ -159,16 +162,18 @@ async function getRewardQueueByTxnId(txnId) {
 async function removeRewardQueueByTxnId(txnId) {
     const reward = await getRewardQueueByTxnId(txnId);
     if (!reward) return;
+    const Bucket = Api.useBucket();
     return Bucket.data.remove(REWARD_QUEUE_BUCKET, reward._id).catch(console.error);
 }
 async function updateRewardQueueByTxnId(txnId) {
     const reward = await getRewardQueueByTxnId(txnId);
     if (!reward) return;
 
-    const tryCount = reward ? reward += 1 : 1,
+    const tryCount = reward.try_count ? reward.try_count += 1 : 1;
 
     if (tryCount > 6) {
-        removeRewardQueueByTxnId(txnId)
+        await removeRewardQueueByTxnId(txnId)
+        return;
     }
 
     const updateData = {
@@ -177,6 +182,7 @@ async function updateRewardQueueByTxnId(txnId) {
         txn_id: String(Date.now()),
         next_try_date: getNextTryDate(tryCount)
     }
+    const Bucket = Api.useBucket();
     return Bucket.data.patch(REWARD_QUEUE_BUCKET, reward._id, updateData).catch(console.error);
 }
 
@@ -216,10 +222,11 @@ function insertPid() {
     Bucket.data.insert(PROCESS_BUCKET, { pid, name: 'bash' }).catch(console.error);
 }
 
-function getNextTryDate(lastDate, tryCount) {
+function getNextTryDate(tryCount) {
     const periodArr = [1, 5, 30, 120, 720, 1440]
     const min = periodArr[tryCount - 1];
     if (!min) return;
 
+    const lastDate = new Date(lastTxnDate);
     return new Date(lastDate.setMinutes(lastDate.getMinutes() + min))
 }
