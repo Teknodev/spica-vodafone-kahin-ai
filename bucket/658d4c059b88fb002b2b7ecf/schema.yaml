@@ -37,6 +37,13 @@ properties:
     description: Description of the txn_id input
     options:
       position: bottom
+  try_count:
+    type: number
+    title: try_count
+    description: Description of the try_count input
+    options:
+      position: bottom
+    default: 0
 acl:
   write: true==true
   read: true==true

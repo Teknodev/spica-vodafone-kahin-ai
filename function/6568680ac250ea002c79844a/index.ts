@@ -12,8 +12,15 @@ const HOST = 'mma.vodafone.com.tr';
 const PORT = 2144;
 // const msisdn = "5367022769";
 
+let lastTxnDate, lastTxnId;
 export async function setReward() {
     console.log("@setReward")
+
+    if (lastTxnDate && terminal && lastTxnId) {
+        terminal.stdin.end();
+        terminal = undefined;
+        await updateRewardQueueByTxnId();
+    }
 
     try {
         if (!terminal) {
@@ -40,6 +47,8 @@ export async function setReward() {
                 txn_id: reward.txn_id
             })
 
+            lastTxnDate = new Date();
+            lastTxnId = reward.txn_id;
             sendMessage(`{ echo "dload ${reward.txn_id} ${REASON_CODE} ${reward.msisdn} 3:5:3221225472"; sleep 1; } | telnet ${HOST} ${PORT} \n`)
             // sendMessage(`{ echo "info ${reward.msisdn}"; sleep 1; } | telnet ${HOST} ${PORT} \n`)
         }
@@ -84,6 +93,7 @@ function handleTelnetRes(message) {
     switch (txnNo) {
         case "info":
         case "dload":
+            lastTxnDate = undefined;
             const resCode = message.split(" ")[1];
             handleTxnNo[txnNo]({ message, resCode })
             break;
@@ -112,6 +122,18 @@ async function handleDload(message, resCode) {
     })
 
     removeRewardQueueByTxnId(txnId)
+
+    if (resCode == RESULT_CODE.SYSTEM_ERROR) {
+        const nextTryDate = new Date();
+        const reward = await getRewardQueueByTxnId(txnId);
+        if (!reward) return;
+        Api.insertOne(REWARD_QUEUE_BUCKET, {
+            msisdn: reward.msisdn,
+            created_at: new Date(),
+            next_try_date: new Date(nextTryDate.setMinutes(nextTryDate.getMinutes() + 5)),
+            txn_id: String(Date.now())
+        })
+    }
 }
 
 function insertTelnetReqRes(message, type) {
@@ -128,11 +150,34 @@ function insertRewardLog(data) {
     return Bucket.data.insert(REWARD_BUCKET, data).catch(console.error);
 }
 
-async function removeRewardQueueByTxnId(txnId) {
+async function getRewardQueueByTxnId(txnId) {
     const Bucket = Api.useBucket();
     const [reward] = await Bucket.data.getAll(REWARD_QUEUE_BUCKET, { queryParams: { filter: { txn_id: txnId } } }).catch(console.error);
+    return reward;
+}
+
+async function removeRewardQueueByTxnId(txnId) {
+    const reward = await getRewardQueueByTxnId(txnId);
     if (!reward) return;
     return Bucket.data.remove(REWARD_QUEUE_BUCKET, reward._id).catch(console.error);
+}
+async function updateRewardQueueByTxnId(txnId) {
+    const reward = await getRewardQueueByTxnId(txnId);
+    if (!reward) return;
+
+    const tryCount = reward ? reward += 1 : 1,
+
+    if (tryCount > 6) {
+        removeRewardQueueByTxnId(txnId)
+    }
+
+    const updateData = {
+        last_try_date: new Date(lastTxnDate),
+        try_count: tryCount,
+        txn_id: String(Date.now()),
+        next_try_date: getNextTryDate(tryCount)
+    }
+    return Bucket.data.patch(REWARD_QUEUE_BUCKET, reward._id, updateData).catch(console.error);
 }
 
 async function updateRewardLogByTxnId(txnId, data) {
@@ -169,4 +214,12 @@ function insertPid() {
 
     const Bucket = Api.useBucket();
     Bucket.data.insert(PROCESS_BUCKET, { pid, name: 'bash' }).catch(console.error);
+}
+
+function getNextTryDate(lastDate, tryCount) {
+    const periodArr = [1, 5, 30, 120, 720, 1440]
+    const min = periodArr[tryCount - 1];
+    if (!min) return;
+
+    return new Date(lastDate.setMinutes(lastDate.getMinutes() + min))
 }
