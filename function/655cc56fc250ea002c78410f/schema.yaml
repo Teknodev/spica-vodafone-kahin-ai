@@ -12,4 +12,5 @@ triggers:
     active: false
 env: {}
 memoryLimit: 100
-order: 27
+order: 6
+category: Helpers

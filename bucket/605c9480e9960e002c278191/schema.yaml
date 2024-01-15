@@ -155,10 +155,41 @@ properties:
     options:
       position: bottom
     default: -2
+  op_note:
+    type: array
+    title: op_note
+    description: Description of the op_note input
+    options:
+      position: bottom
+    items:
+      title: Title of the items
+      type: object
+      properties:
+        date:
+          type: date
+          title: date
+          description: Description of the date input
+          options:
+            position: bottom
+          default: :created_at
+        note:
+          type: textarea
+          title: note
+          description: Description of the note input
+          options:
+            position: bottom
+        sender:
+          type: string
+          title: sender
+          description: Description of the sender input
+          options:
+            position: bottom
 acl:
   write: |-
     auth.attributes.role == "admin" ||
-    auth.key == "406bus18l2yiufdq"
+    auth.key == "406bus18l2yiufdq" ||
+    auth.key == "8rpwp118lp6wqu02" ||
+    auth.key == "15roami17lr0oh7wh"
   read: true==true
 required: []
-order: 25
+order: 21

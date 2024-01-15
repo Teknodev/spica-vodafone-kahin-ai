@@ -237,7 +237,7 @@ async function requestForANewGame(data) {
     // !TODO should send this request to the message broker
     // https://vodafone.queue.spicaengine.com/message?topic_id=657310d3f1bac9002c940b22
     // https://vodafone-sayi-krali-a4d57.hq.spicaengine.com/api/fn-execute/new-game-listener
-    Api.httpRequest('post', 'https://vodafone-s1-6b082.hq.spicaengine.com/api/fn-execute/new-game-listener', {
+    Api.httpRequest('post', 'https://vodafone.queue.spicaengine.com/message?topic_id=657310d3f1bac9002c940b22', {
         "referenceNo": String(Date.now()),
         "service": "sayi_krali",
         "data": data,
@@ -279,4 +279,15 @@ function insertServerInfo(duelData, duelId, tokens, referenceNo, serverName) {
     };
 
     return Api.insertOne(SERVER_INFO_BUCKET, insertedObj).catch(err => console.log(err))
+}
+
+export async function testMessageBroker() {
+    const res = await Api.httpRequest('post', 'https://vodafone.queue.spicaengine.com/message?topic_id=657310d3f1bac9002c940b22', {
+        "referenceNo": String(Date.now()),
+        "service": "sayi_krali",
+    }, {}).catch(err => console.log("ERR: ", err));
+
+    console.log("res: ", res)
+
+    return "ok"
 }

@@ -5,9 +5,11 @@ timeout: 37
 triggers:
   setReward:
     type: schedule
-    active: false
+    active: true
     options:
       timezone: UTC
-      frequency: "*/30 * * * * *"
-env: {}
+      frequency: "*/5 * * * * *"
+env:
+  NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
+order: 29

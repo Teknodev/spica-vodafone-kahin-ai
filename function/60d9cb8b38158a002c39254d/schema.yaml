@@ -32,6 +32,13 @@ triggers:
       preflight: true
     type: http
     active: true
+  resetPassword:
+    options:
+      method: Post
+      path: /reset-password
+      preflight: true
+    type: http
+    active: true
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100

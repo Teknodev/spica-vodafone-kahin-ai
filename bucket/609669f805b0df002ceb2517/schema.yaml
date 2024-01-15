@@ -46,8 +46,17 @@ properties:
     description: Description of the status_code input
     options:
       position: bottom
+  purpose:
+    type: string
+    title: purpose
+    description: Description of the purpose input
+    options:
+      position: bottom
+    enum:
+      - charge
+      - points
 acl:
   write: true==true
   read: true==true
-order: 16
+order: 15
 category: Logs

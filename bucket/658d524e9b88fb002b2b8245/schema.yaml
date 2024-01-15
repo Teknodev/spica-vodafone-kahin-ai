@@ -37,4 +37,5 @@ properties:
 acl:
   write: true==true
   read: true==true
-order: 32
+order: 6
+category: DevOps

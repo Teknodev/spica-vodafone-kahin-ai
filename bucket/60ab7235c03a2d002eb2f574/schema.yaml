@@ -2,20 +2,14 @@ _id: 60ab7235c03a2d002eb2f574
 title: Charge Logs
 description: Describe your new bucket
 icon: line_style
-primary: transaction_id
+primary: tx_key
 readOnly: false
 history: false
 properties:
-  transaction_id:
+  tx_key:
     type: string
-    title: transaction_id
-    description: Description of the transaction_id input
-    options:
-      position: bottom
-  commit_token:
-    type: string
-    title: commit_token
-    description: Description of the commit_token input
+    title: tx_key
+    description: Description of the tx_key input
     options:
       position: bottom
   msisdn:
@@ -30,30 +24,6 @@ properties:
     description: Description of the date input
     options:
       position: bottom
-  listener_result:
-    type: string
-    title: listener_result
-    description: Description of the listener_result input
-    options:
-      position: bottom
-  commit_result:
-    type: string
-    title: commit_result
-    description: Description of the commit_result input
-    options:
-      position: bottom
-  result:
-    type: string
-    title: result
-    description: Description of the result input
-    options:
-      position: bottom
-  identity:
-    type: string
-    title: identity
-    description: Description of the identity input
-    options:
-      position: bottom
   status:
     type: boolean
     title: status
@@ -61,33 +31,20 @@ properties:
     options:
       position: bottom
     default: false
-  user_text:
+  purpose:
     type: string
-    title: user_text
-    description: Description of the user_text input
+    title: purpose
+    description: Description of the purpose input
     options:
       position: bottom
-  user_action_date:
-    type: date
-    title: user_action_date
-    description: Description of the user_action_date input
-    options:
-      position: bottom
-  item_id:
+  amount:
     type: number
-    title: item_id
-    description: Description of the item_id input
+    title: amount
+    description: Description of the amount input
     options:
       position: bottom
-  is_success:
-    type: boolean
-    title: is_success
-    description: Description of the is_success input
-    options:
-      position: bottom
-    default: false
 acl:
   write: true==true
   read: true==true
-order: 15
+order: 14
 category: Logs

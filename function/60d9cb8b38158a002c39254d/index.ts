@@ -1,30 +1,24 @@
 import * as Api from "../../63b57559ebfd83002c5defe5/.build";
 import * as Helper from "../../633bf949956545002c9b7e31/.build";
 import * as PmpEncryptDecrypt from "../../655cc56fc250ea002c78410f/.build";
+import * as Sms from "../../65957905073c73002bdb600b/.build";
 import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
 const USER_POLICY = VARIABLE.USER_POLICY;
 const USER_BUCKET = VARIABLE.BUCKET.USER;
-const PASSWORD_SALT = VARIABLE.PASSWORD_SALT;
 
 export async function login(req, res) {
-    const { token } = req.body;
+    const { msisdn, password } = req.body;
 
-    if (!token) {
-        return res.status(400).send({ message: "Token is required." });
+    if (!msisdn || !password) {
+        return res.status(400).send({ message: "Msisdn and password are required." });
     }
-
-    const dectyptResult = PmpEncryptDecrypt.decryptToken(token);
 
     let identityData;
     try {
-        identityData = await getIdentityToken(dectyptResult.msisdn)
+        identityData = await getIdentityToken(msisdn, password)
     } catch (err) {
-        return res.status(400).send({ message: "User is not found" });
-    }
-
-    if (!identityData) {
-        return res.status(400).send({ message: "User is not found" });
+        return res.status(400).send({ status_code: 2 });
     }
 
     const decodedToken = await Helper.getDecodedToken(identityData.token)
@@ -35,7 +29,6 @@ export async function login(req, res) {
     return res.status(200).send({
         token: identityData.token,
         user: user,
-        vodafoneToken: dectyptResult.token
     });
 }
 
@@ -43,29 +36,44 @@ export async function register(req, res) {
     const { token } = req.body;
 
     if (!token) {
-        return res.status(400).send({ message: "Token is required." });
+        return res.status(400).send({ status_code: 3 });
     }
 
     const dectyptResult = PmpEncryptDecrypt.decryptToken(token);
+    // const dectyptResult = {
+    //     msisdn: "905530129507"
+    // }
 
     const msisdn = dectyptResult.msisdn;
+    if (!msisdn) {
+        return res.status(400).send({ status_code: 1 });
+    }
+
     const identifier = dectyptResult.msisdn;
 
-    const identityData = await createIdentity(identifier, msisdn)
-        .catch(error => {
-            if (error.message != 'Identity already exists.') {
-                console.log("ERORR", error)
-            }
-            return res
-                .status(400)
-                .send({
-                    message: "Error while creating identity",
-                    error: error
-                });
-        });
+    const Identity = Api.useIdentity();
+    let [identityData] = await Identity.getAll({ filter: { identifier } });
+    if (identityData) {
+        return res.status(400).send({ status_code: 4 });
+    }
+
+    let password = codeGenerate(6);
+
+    identityData = await Identity.insert({
+        identifier,
+        password,
+        policies: [`${USER_POLICY}`],
+        attributes: { msisdn }
+    }).catch(console.error)
+
+    if (!identityData) {
+        return res.status(400).send({ status_code: 1 });
+    }
+
+    Sms.sendPassword(msisdn, password);
 
     const insertedObject = await Api.insertOne(USER_BUCKET, {
-        identity: identityData.identity_id,
+        identity: String(identityData._id),
         avatar_id: 0,
         created_at: new Date(),
         total_point: 0,
@@ -74,56 +82,32 @@ export async function register(req, res) {
         lose_count: 0,
         total_award: 0,
         range_award: 0,
-        available_play_count: 0,
+        available_play_count: 1,
         bot: false,
         perm_accept: false,
         free_play: false
     }).catch(console.error)
 
     if (!insertedObject) {
-        return res.status(400).send({
-            message:
-                "Error while adding user to User Bucket (Identity already added).",
-            error: error
-        });
+        return res.status(400).send({ status_code: 1 });
     }
 
     const user = insertedObject.ops[0];
-    const indentityToken = await getIdentityToken(msisdn).catch(console.error)
+    const indentityToken = await getIdentityToken(msisdn, password).catch(console.error)
     return res.status(200).send({
         token: indentityToken.token,
         user: user,
-        vodafoneToken: dectyptResult.token
     });
 }
 
-function getIdentityToken(identifier) {
+function getIdentityToken(identifier, password) {
     const Identity = Api.useIdentity();
     return new Promise(async (resolve, reject) => {
-        await Identity.login(identifier, PASSWORD_SALT)
+        await Identity.login(identifier, password)
             .then(data => {
                 resolve({ token: data });
             })
             .catch(error => {
-                reject(error);
-            });
-    });
-}
-
-function createIdentity(identifier, msisdn) {
-    const Identity = Api.useIdentity();
-    return new Promise(async (resolve, reject) => {
-        await Identity.insert({
-            identifier: identifier,
-            password: PASSWORD_SALT,
-            policies: [`${USER_POLICY}`],
-            attributes: { msisdn }
-        })
-            .then(identity => {
-                resolve({ identity_id: identity._id });
-            })
-            .catch(error => {
-                console.log("ERROR 7", error);
                 reject(error);
             });
     });
@@ -146,4 +130,88 @@ export async function userUpdate(req, res) {
 
 export function getRedirectURL() {
     return PmpEncryptDecrypt.getRedirectURL();
+}
+
+function codeGenerate(length) {
+    let result = "";
+    let characters = "123456789";
+    let charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+
+export async function resetPassword(req, res) {
+    const { msisdn } = req.body;
+
+    if (!msisdn) {
+        return res.status(400).send({ status_code: 6 });
+    }
+
+    const Identity = Api.useIdentity();
+    const [indentity] = await Identity.getAll({ filter: { identifier: msisdn } }).catch(console.error);
+    if (!indentity) {
+        return res.status(400).send({ status_code: 7 });
+    }
+
+    let password = codeGenerate(6);
+    let updatedIdentity = {
+        identifier: indentity.identifier,
+        password,
+        attributes: indentity.attributes,
+        policies: indentity.policies,
+    }
+
+    const identityData = await Identity.update(indentity._id, updatedIdentity).catch(console.error)
+    if (!identityData) {
+        return res.status(400).send({ status_code: 1 });
+    }
+
+    Sms.sendPassword(indentity.identifier, password);
+
+    return res.status(200).send("success");
+}
+
+export async function smsFlowRegister(msisdn) {
+    const identifier = msisdn;
+
+    const Identity = Api.useIdentity();
+    let [identityData] = await Identity.getAll({ filter: { identifier } });
+    if (identityData) {
+        return res.status(400).send({ status_code: 4 });
+    }
+
+    let password = codeGenerate(6);
+
+    identityData = await Identity.insert({
+        identifier,
+        password,
+        policies: [`${USER_POLICY}`],
+        attributes: { msisdn }
+    }).catch(console.error)
+
+    if (!identityData) {
+        return res.status(400).send({ status_code: 1 });
+    }
+
+    Sms.sendPassword(msisdn, password);
+
+    await Api.insertOne(USER_BUCKET, {
+        identity: String(identityData._id),
+        avatar_id: 0,
+        created_at: new Date(),
+        total_point: 0,
+        range_point: 0,
+        win_count: 0,
+        lose_count: 0,
+        total_award: 0,
+        range_award: 0,
+        available_play_count: 1,
+        bot: false,
+        perm_accept: false,
+        free_play: false
+    }).catch(console.error)
+
+    return;
 }

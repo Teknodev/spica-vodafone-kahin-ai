@@ -5,6 +5,7 @@ import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
 const SERVER_INFO_BUCKET = VARIABLE.BUCKET.SERVER_INFO;
 const OPERATION_KEY = VARIABLE.OPERATION_KEY;
+const REWARD_BUCKET = VARIABLE.BUCKET.REWARD;
 
 export async function setReadyMainServer(req, res) {
     const { userId, duelId, key } = req.body;
@@ -102,4 +103,27 @@ async function changeServerAvailabilityToUser(userId, duelId, type) {
 
     await Api.updateOne(SERVER_INFO_BUCKET, { duel_id: duelId }, setQuery);
     return true;
+}
+
+export async function getUserRewardLogs(req, res) {
+    const { token } = req.body;
+
+    const decodedToken = await Helper.getDecodedToken(token)
+    if (!decodedToken) {
+        return res.status(400).send({ message: "Token is not verified." });
+    }
+
+    let msisdn = decodedToken.attributes.msisdn;
+
+    if (!msisdn) {
+        return res.status(400).send({ message: "User not found" });
+    }
+
+    if (msisdn.startsWith("90")) {
+        msisdn = msisdn.substring(2)
+    }
+
+    const rewards = await Api.getMany(REWARD_BUCKET, { msisdn });
+
+    return { rewards }
 }

@@ -49,18 +49,18 @@ export async function insertPastMatchFromServer(req, res) {
         user1.lose_count += 1;
         user1DailyPoint = 50;
     }
-
+    
     await Api.insertOne(PAST_MATCH_BUCKET, {
-        duel_id: duel.duel_id,
+        duel_id: String(duel._id),
         name: user1.name + " vs " + user2.name,
         user1: duel.user1,
         user2: duel.user2,
         winner: duel.winner,
         user1_answers: duel.user1_answers,
-        user2_answers: duel.user2_answers,
+        user2_answers: duel.user2_answers || [],
         user1_points: duel.user1_points,
         user2_points: duel.user2_points,
-        start_time: duel.start_time,
+        start_time: Api.toObjectId(duel._id).getTimestamp(),
         end_time: new Date(),
         player_type: duel.player_type,
         points_earned: duel.user1_points + duel.user2_points,
@@ -73,9 +73,9 @@ export async function insertPastMatchFromServer(req, res) {
 }
 
 function updateUser(userIndex, user, dailyPoint, duel) {
-    let rangeRewardCount = user.range_reward_count;
+    let rangeRewardCount = user.range_reward_count || 0;
     const totalPoint = parseInt(user.total_point);
-    const result = Math.floor(totalPoint + dailyPoint / 1000);
+    const result = Math.floor((totalPoint + dailyPoint) / 1000);
 
     if (result > rangeRewardCount) {
         setReward(user)
@@ -106,7 +106,8 @@ async function removeServerInfo(duel_id) {
     Api.deleteOne(SERVER_INFO_BUCKET, { duel_id: duel_id })
 }
 
-export async function setReward() {
+export async function setReward(user) {
+    console.log("SET REWARD")
     if (!user.identity) return;
 
     const db = await Api.useDatabase();
@@ -121,6 +122,7 @@ export async function setReward() {
         msisdn,
         created_at: new Date(),
         next_try_date: new Date(),
-        txn_id: String(Date.now())
+        txn_id: String(Date.now()),
+        purpose: 'points'
     })
 }

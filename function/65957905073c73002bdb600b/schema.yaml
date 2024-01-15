@@ -1,0 +1,14 @@
+_id: 65957905073c73002bdb600b
+name: SMS
+language: javascript
+timeout: 20.3
+triggers:
+  sendSms:
+    options:
+      method: Get
+      path: /sendSms
+      preflight: true
+    type: http
+    active: true
+env: {}
+memoryLimit: 100

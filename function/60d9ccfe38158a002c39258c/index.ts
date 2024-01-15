@@ -1,41 +1,21 @@
 import * as Api from "../../63b57559ebfd83002c5defe5/.build";
-import * as Tcell from "../../63b6d60cebfd83002c5e1966/.build";
 import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
-const BUGGED_REWARD_BUCKET = VARIABLE.BUCKET.BUGGED_REWARD;
-const MANUALLY_REWARD_BUCKET = VARIABLE.BUCKET.MANUALLY_REWARD;
-
-const CAMPAIGN_ID = VARIABLE.TCELL.CAMPAIGN_ID;
-const VARIANT_ID = VARIABLE.TCELL.VARIANT_ID;
-const OFFER_ID_1GB = VARIABLE.TCELL.OFFER_ID_1GB;
-
-const TCELL_USERNAME = VARIABLE.TCELL.USERNAME;
-const TCELL_PASSWORD = VARIABLE.TCELL.PASSWORD;
-
+const REWARD_QUEUE_BUCKET = VARIABLE.BUCKET.REWARD_QUEUE;
 
 export async function applyRewardManually(change) {
-    const sessionId = await Tcell.getSessionId(TCELL_USERNAME, TCELL_PASSWORD, VARIANT_ID);
+    let msisdn = change.current.msisdn;
+    if (!msisdn) return;
 
-    let awardRes;
-    let matchID = "";
-
-    if (change.current.retry_id) {
-        const rewardData = await Api.getOne(BUGGED_REWARD_BUCKET, {
-            _id: Api.toObjectId(change.current.retry_id)
-        })
-        matchID = rewardData.match_id;
+    if (msisdn.startsWith("90")) {
+        msisdn = msisdn.substring(2)
     }
 
-    try {
-        awardRes = await Tcell.setAward(sessionId, change.current.msisdn, OFFER_ID_1GB, CAMPAIGN_ID);
-        if (awardRes) {
-            Tcell.handleAwardResData(awardRes.data, matchID, 'manual');
-        }
-    } catch (err) {
-        console.log("AWARD ERR: ", err)
-    }
-
-    Api.updateOne(MANUALLY_REWARD_BUCKET, { _id: Api.toObjectId(change.documentKey) }, {
-        $set: { result: awardRes.data, process_completed: true }
+    Api.insertOne(REWARD_QUEUE_BUCKET, {
+        msisdn,
+        created_at: new Date(),
+        next_try_date: new Date(),
+        txn_id: String(Date.now()),
+        purpose: change.current.purpose
     })
 }

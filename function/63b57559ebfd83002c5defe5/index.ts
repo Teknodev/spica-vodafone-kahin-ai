@@ -91,7 +91,6 @@ export async function updateMany(bucketId, filter, update) {
 }
 
 export async function insertOne(bucketId, data) {
-    console.log(bucketId, data)
     const db = await useDatabase();
     return db.collection(`bucket_${bucketId}`)
         .insertOne(data)

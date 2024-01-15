@@ -20,5 +20,5 @@ env:
   DUEL_BUCKET_ID: "{DUEL_BUCKET_ID}"
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
-order: 7
+order: 9
 category: Server

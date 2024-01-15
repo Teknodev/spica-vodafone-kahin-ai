@@ -18,8 +18,15 @@ triggers:
       preflight: true
     type: http
     active: true
+  testMessageBroker:
+    options:
+      method: Get
+      path: /testMessageBroker
+      preflight: true
+    type: http
+    active: true
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
-order: 18
+order: 19
 category: Game

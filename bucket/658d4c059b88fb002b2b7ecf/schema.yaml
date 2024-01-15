@@ -44,7 +44,16 @@ properties:
     options:
       position: bottom
     default: 0
+  purpose:
+    type: string
+    title: purpose
+    description: Description of the purpose input
+    options:
+      position: bottom
+    enum:
+      - charge
+      - points
 acl:
   write: true==true
   read: true==true
-order: 31
+order: 25

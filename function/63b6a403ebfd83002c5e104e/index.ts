@@ -4,6 +4,10 @@ import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 const USER_BUCKET = VARIABLE.BUCKET.USER;
 
 export async function getByMsisdn(msisdn) {
+    if (!msisdn.startsWith("90")) {
+        msisdn = `90${msisdn}`
+    }
+
     const db = await Api.useDatabase();
     const identity = await db.collection('identity')
         .findOne({ "attributes.msisdn": msisdn })

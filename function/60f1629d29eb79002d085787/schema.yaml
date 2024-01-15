@@ -10,127 +10,16 @@ triggers:
       path: /matchChart
       preflight: true
     type: http
-    active: false
+    active: true
   totalMatchChart:
     options:
       method: Get
       path: /totalMatchChart
       preflight: true
     type: http
-    active: false
-  dashboardPastMatches:
-    options:
-      method: Get
-      path: /dashboardPastMatches
-      preflight: true
-    type: http
-    active: false
-  dashboardUserRewards:
-    options:
-      method: Get
-      path: /dashboardUserRewards
-      preflight: true
-    type: http
-    active: false
-  dashboardDuelAnswers:
-    options:
-      method: Get
-      path: /dashboardDuelAnswers
-      preflight: true
-    type: http
-    active: false
-  userDashboardCharges:
-    options:
-      method: Get
-      path: /userDashboardCharges
-      preflight: true
-    type: http
-    active: false
-  playedUsersCount:
-    options:
-      method: Get
-      path: /playedUsersCount
-      preflight: true
-    type: http
-    active: false
-  dashboardManuallyReward:
-    options:
-      method: Get
-      path: /dashboardManuallyReward
-      preflight: true
-    type: http
-    active: false
-  dashboardGetContacts:
-    options:
-      method: Get
-      path: /dashboardGetContacts
-      preflight: true
-    type: http
-    active: false
-  updateContact:
-    options:
-      method: Post
-      path: /updateContact
-      preflight: true
-    type: http
-    active: false
-  getManuallyRewardDashboard:
-    options:
-      method: Get
-      path: /getManuallyRewardDashboard
-      preflight: true
-    type: http
-    active: false
-  generateDashboardKey:
-    options:
-      timezone: Europe/Istanbul
-      frequency: "*/15 * * * *"
-    type: schedule
-    active: false
-  getDashboarKey:
-    options:
-      method: Get
-      path: /getDashboarKey
-      preflight: true
-    type: http
-    active: false
-  getLeaderUsersDashboard:
-    options:
-      method: Get
-      path: /getLeaderUsersDashboard
-      preflight: true
-    type: http
-    active: false
-  dahsboardBuggedRewards:
-    options:
-      method: Get
-      path: /dahsboardBuggedRewards
-      preflight: true
-    type: http
-    active: false
-  dashboardUserAnalysisReport:
-    options:
-      method: Get
-      path: /dashboardUserAnalysisReport
-      preflight: true
-    type: http
-    active: false
-  downloadUserAnalysisReport:
-    options:
-      method: Get
-      path: /downloadUserAnalysisReport
-      preflight: true
-    type: http
-    active: false
-  dahsboardUserPoints:
-    options:
-      method: Get
-      path: /dahsboardUserPoints
-      preflight: true
-    type: http
-    active: false
+    active: true
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
-order: 13
+order: 14
 category: Operation

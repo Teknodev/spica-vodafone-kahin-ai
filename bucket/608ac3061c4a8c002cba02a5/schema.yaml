@@ -25,24 +25,6 @@ properties:
     description: Description of the new_user input
     options:
       position: bottom
-  playing_users:
-    type: number
-    title: playing_users
-    description: Description of the playing_users input
-    options:
-      position: bottom
-  winner:
-    type: number
-    title: winner
-    description: Description of the winner input
-    options:
-      position: bottom
-  loser:
-    type: number
-    title: loser
-    description: Description of the loser input
-    options:
-      position: bottom
   report_type:
     type: number
     title: report_type
@@ -53,5 +35,5 @@ properties:
 acl:
   write: true==true
   read: true==true
-order: 8
+order: 9
 category: Reports

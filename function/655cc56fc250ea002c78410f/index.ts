@@ -175,8 +175,8 @@ export function getRedirectURL() {
         .withSecretKey(secretKey)
         .build();
 
-    console.log("RandomToken:\n\t", randomToken);
-    console.log("Encrypted:\n\t", encrypted);
+    // console.log("RandomToken:\n\t", randomToken);
+    // console.log("Encrypted:\n\t", encrypted);
     console.log("Redirect URL:\n\t", redirectUrl);
 
     return redirectUrl;
@@ -188,12 +188,13 @@ export function decryptToken(token) {
     const encryptedPmpResult = token;
     const pmpResult = PmpResult.parser().withSecretKey(secretKey).pmpResult(encryptedPmpResult).parse();
 
-    console.log('ReturnCode:\n\t' + pmpResult.getReturnCode() + '\n');
-    console.log('Msisdn:\n\t' + pmpResult.getMsisdn() + '\n');
-    console.log('OfferKey:\n\t' + pmpResult.getOfferKey() + '\n');
-    console.log('ContentKey:\n\t' + pmpResult.getContentKey() + '\n');
-    console.log('Token:\n\t' + pmpResult.getToken() + '\n');
-    console.log('Uid:\n\t' + pmpResult.getUid() + '\n');
+    console.log("@pmpResult: ", pmpResult)
+    // console.log('ReturnCode:\n\t' + pmpResult.getReturnCode() + '\n');
+    // console.log('Msisdn:\n\t' + pmpResult.getMsisdn() + '\n');
+    // console.log('OfferKey:\n\t' + pmpResult.getOfferKey() + '\n');
+    // console.log('ContentKey:\n\t' + pmpResult.getContentKey() + '\n');
+    // console.log('Token:\n\t' + pmpResult.getToken() + '\n');
+    // console.log('Uid:\n\t' + pmpResult.getUid() + '\n');
 
     return {
         msisdn: pmpResult.getMsisdn(),

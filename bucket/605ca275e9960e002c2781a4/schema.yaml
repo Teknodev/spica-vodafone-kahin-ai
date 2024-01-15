@@ -156,5 +156,5 @@ acl:
 required:
   - user1
   - user2
-order: 21
+order: 18
 category: Server

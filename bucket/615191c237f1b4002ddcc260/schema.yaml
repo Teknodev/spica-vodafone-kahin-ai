@@ -20,12 +20,6 @@ properties:
     options:
       position: bottom
     default: 0
-  error_text:
-    type: string
-    title: error_text
-    description: Description of the error_text input
-    options:
-      position: bottom
   report_type:
     type: number
     title: report_type
@@ -39,8 +33,27 @@ properties:
     description: Description of the ratio input
     options:
       position: bottom
+  status_code:
+    type: number
+    title: status_code
+    description: Description of the status_code input
+    options:
+      position: bottom
+  charge:
+    type: number
+    title: charge
+    description: Description of the charge input
+    options:
+      position: bottom
+    default: 0
+  points:
+    type: number
+    title: points
+    description: Description of the points input
+    options:
+      position: bottom
 acl:
   write: true==true
   read: true==true
-order: 14
+order: 11
 category: Reports

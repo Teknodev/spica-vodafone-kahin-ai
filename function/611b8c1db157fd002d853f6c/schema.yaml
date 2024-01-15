@@ -38,8 +38,15 @@ triggers:
       preflight: true
     type: http
     active: true
+  getUserRewardLogs:
+    options:
+      method: Post
+      path: /get-user-reward-logs
+      preflight: true
+    type: http
+    active: true
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100
-order: 23
+order: 24
 category: Game

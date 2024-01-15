@@ -16,6 +16,8 @@ triggers:
       path: /createSubscription
       preflight: true
     type: http
-    active: true
+    active: false
 env: {}
 memoryLimit: 100
+order: 7
+category: Helpers

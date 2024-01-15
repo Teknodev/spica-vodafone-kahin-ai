@@ -36,7 +36,9 @@ export const env = {
         CONTACT_MESSAGE: "65781505c250ea002c7b92cc",
         REWARD_QUEUE: "658d4c059b88fb002b2b7ecf",
         TELNET_REQ_RES: "658d524e9b88fb002b2b8245",
-        PROCESS: "658ed34c9b88fb002b2be508"
+        PROCESS: "658ed34c9b88fb002b2be508",
+        SUBSCRIPTION_REPORT: "6594096b073c73002bdb0350",
+        SMS_LOG: "65968b4a073c73002bdb9a6b"
     },
     MAILER: {
         SMTP_USER: "noreply@spicaengine.com",

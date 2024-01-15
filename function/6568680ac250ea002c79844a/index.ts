@@ -1,4 +1,5 @@
 import * as Api from "../../63b57559ebfd83002c5defe5/.build";
+import * as User from "../../63b6a403ebfd83002c5e104e/.build";
 import { env as VARIABLE } from "../../63b57e98ebfd83002c5df0c5/.build";
 
 const REWARD_BUCKET = VARIABLE.BUCKET.REWARD;
@@ -14,8 +15,6 @@ const PORT = 2144;
 
 let lastTxnDate, lastTxnId;
 export async function setReward() {
-    console.log("@setReward")
-
     if (lastTxnDate && terminal && lastTxnId) {
         terminal.stdin.end();
         terminal = undefined;
@@ -45,7 +44,8 @@ export async function setReward() {
             await insertRewardLog({
                 msisdn: reward.msisdn,
                 date: new Date(),
-                txn_id: reward.txn_id
+                txn_id: reward.txn_id,
+                purpose: reward.purpose
             })
 
             lastTxnDate = new Date();
@@ -61,12 +61,9 @@ export async function setReward() {
 }
 
 export async function createChildProcess() {
-    console.log("@createChildProcess")
-
     terminal = require('child_process').spawn('bash');
 
     terminal.stdout.on('data', function (data) {
-        console.log('stdout: ' + data);
         handleTelnetRes(data.toString())
     });
 
@@ -109,32 +106,43 @@ async function handleInfo(message, resCode) {
 }
 
 async function handleDload(message, resCode) {
-    console.log("@handleDload", message);
+    console.log("@handleDload", message, resCode);
 
     const parsed = parseInput(message)
     const userText = parsed[2];
     const date = new Date(convertToDate(parsed[3]))
     const txnId = parsed[4];
 
-    updateRewardLogByTxnId(txnId, {
-        user_text: userText,
-        date,
-        status: resCode == RESULT_CODE.SUCCESS,
-        status_code: Number(resCode)
-    })
+    const reward = await getRewardQueueByTxnId(txnId);
 
     removeRewardQueueByTxnId(txnId)
 
-    if (resCode == RESULT_CODE.SYSTEM_ERROR) {
-        const nextTryDate = new Date();
-        const reward = await getRewardQueueByTxnId(txnId);
-        if (!reward) return;
-        Api.insertOne(REWARD_QUEUE_BUCKET, {
-            msisdn: reward.msisdn,
-            created_at: new Date(),
-            next_try_date: new Date(nextTryDate.setMinutes(nextTryDate.getMinutes() + 5)),
-            txn_id: String(Date.now())
-        })
+    if (!reward) return;
+
+    updateRewardLogByTxnId(txnId, {
+        user_text: userText,
+        // date,
+        status: resCode == RESULT_CODE.SUCCESS,
+        status_code: Number(resCode),
+        purpose: reward.purpose
+    })
+
+    switch (resCode) {
+        case RESULT_CODE.SYSTEM_ERROR:
+            const nextTryDate = new Date();
+            Api.insertOne(REWARD_QUEUE_BUCKET, {
+                msisdn: reward.msisdn,
+                created_at: new Date(),
+                next_try_date: new Date(nextTryDate.setMinutes(nextTryDate.getMinutes() + 5)),
+                txn_id: String(Date.now()),
+                purpose: reward.purpose
+            })
+            break;
+        case RESULT_CODE.SUCCESS:
+            updateUserTotalReward(reward.msisdn);
+            break;
+        default:
+            break;
     }
 }
 
@@ -192,14 +200,32 @@ async function updateRewardLogByTxnId(txnId, data) {
     return Bucket.data.patch(REWARD_BUCKET, reward._id, data).catch(console.error);
 }
 
+async function updateUserTotalReward(msisdn) {
+    if (!msisdn) return;
+    const user = await User.getByMsisdn(msisdn);
+    if (!user) return;
+
+    const rangeAward = (user.range_award || 0) + 3;
+    const totalAward = (user.total_award || 0) + 3
+
+    const update = {
+        "$set": {
+            range_award: rangeAward,
+            total_award: totalAward
+        }
+    }
+
+    User.updateOne({ _id: user._id }, update).catch(console.error)
+}
+
 const TXN_NO = {
     INFO: "info",
     DLOAD: "dload"
 }
 
 const RESULT_CODE = {
-    "SUCCESS": 0,
-    "SYSTEM_ERROR": 3
+    "SUCCESS": "0",
+    "SYSTEM_ERROR": "3"
 }
 
 function parseInput(input) {

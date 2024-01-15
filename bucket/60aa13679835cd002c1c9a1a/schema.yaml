@@ -6,12 +6,6 @@ primary: msisdn
 readOnly: false
 history: false
 properties:
-  msisdn:
-    type: number
-    title: msisdn
-    description: Description of the msisdn input
-    options:
-      position: bottom
   reward:
     type: string
     title: reward
@@ -19,7 +13,7 @@ properties:
     options:
       position: bottom
     enum:
-      - daily_1
+      - weekly_3
   created_at:
     type: date
     title: created_at
@@ -27,34 +21,23 @@ properties:
     options:
       position: bottom
     default: :created_at
-  process_completed:
-    type: boolean
-    title: process_completed
-    description: Description of the process_completed input
-    options:
-      position: bottom
-    default: false
-  result:
-    type: textarea
-    title: result
-    description: Description of the result input
-    options:
-      position: bottom
-  system:
-    type: boolean
-    title: system
-    description: Description of the system input
-    options:
-      position: bottom
-    default: false
-  retry_id:
+  msisdn:
     type: string
-    title: retry_id
-    description: Description of the retry_id input
+    title: msisdn
+    description: Description of the msisdn input
     options:
       position: bottom
+  purpose:
+    type: string
+    title: purpose
+    description: Description of the purpose input
+    options:
+      position: bottom
+    enum:
+      - charge
+      - points
 acl:
   write: true==true
   read: true==true
-order: 18
+order: 16
 category: Logs
