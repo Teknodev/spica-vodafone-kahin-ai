@@ -14,6 +14,7 @@ const ANSWER_TO_QUESTION_REPORT_BUCKET = VARIABLE.BUCKET.ANSWER_TO_QUESTION_REPO
 const REWARD_REPORT_BUCKET = VARIABLE.BUCKET.REWARD_REPORT;
 const REWARD_MAILER = VARIABLE.BUCKET.MAILER;
 const SUBSCRIPTION_REPORT_BUCKET = VARIABLE.BUCKET.SUBSCRIPTION_REPORT;
+const CHARGE_VALUE = 96;
 
 /*
     REPORT TYPES: 
@@ -111,14 +112,17 @@ async function getData(reportType) {
     const matchGeneralHtml = await matchGeneralReport(reportType, dateFilter).catch(err =>
         console.log("ERROR 24", err)
     );
-    const rewardHtml = await rewardReport(reportType, dateFilter).catch(err =>
-        console.log("ERROR 25", err)
-    );
+    // const rewardHtml = await rewardReport(reportType, dateFilter).catch(err =>
+    //     console.log("ERROR 25", err)
+    // );
     const subscriptionHtml = await subscriptionReport(reportType, dateFilter).catch(err =>
         console.log("ERROR 26", err)
     );
     const questionsHtml = await questionsReport(reportType, dateFilter).catch(err =>
         console.log("ERROR 27", err)
+    );
+    const revenueHtml = await revenueReport(reportType, dateFilter).catch(err =>
+        console.log("ERROR 28", err)
     );
 
     let html =
@@ -126,15 +130,18 @@ async function getData(reportType) {
         "<br/><br/>" +
         matchGeneralHtml +
         "<br/><br/>" +
-        rewardHtml +
-        "<br/><br/>" +
+        // rewardHtml +
+        // "<br/><br/>" +
         subscriptionHtml +
+        "<br/><br/>" +
+        revenueHtml +
         "<br/><br/>" +
         questionsHtml;
 
 
     return html;
 }
+
 
 
 async function usersReport(reportType, dateFilter) {
@@ -258,13 +265,15 @@ async function matchGeneralReport(reportType, dateFilter) {
         matchData.forEach(data => {
             tableBody += `
             <tr>
-             <td style="width: 10%;">${new Date(data.date).toLocaleDateString()}</td>
-             <td style="width: 10%;">${numberWithDot(data.p2p_play)}</td>
-             <td style="width: 10%;">${numberWithDot(data.p2p_play_points_earned)}</td>
-             <td style="width: 10%;">${numberWithDot(data.p2m_play)}</td>
-             <td style="width: 10%;">${numberWithDot(data.p2m_play_points_earned)}</td>
-             <td style="width: 10%;">${numberWithDot(data.player)}</td>
-             <td style="width: 10%;">${numberWithDot(data.play)}</td>
+             <td style="width: 11.1%;">${new Date(data.date).toLocaleDateString()}</td>
+             <td style="width: 11.1%;">${numberWithDot(data.p2p_play)}</td>
+             <td style="width: 11.1%;">${numberWithDot(data.p2p_play_points_earned)}</td>
+             <td style="width: 11.1%;">${numberWithDot(data.p2p_play_points)}</td>
+             <td style="width: 11.1%;">${numberWithDot(data.p2m_play)}</td>
+             <td style="width: 11.1%;">${numberWithDot(data.p2m_play_points_earned)}</td>
+             <td style="width: 11.1%;">${numberWithDot(data.p2m_play_points)}</td>
+             <td style="width: 11.1%;">${numberWithDot(data.player)}</td>
+             <td style="width: 11.1%;">${numberWithDot(data.play)}</td>
             </tr>`;
         });
         html = `
@@ -272,13 +281,15 @@ async function matchGeneralReport(reportType, dateFilter) {
          <table style="width: 100%; border-collapse: collapse;">
             <tbody>
             <tr>
-            <th style="width: 10%; text-align:left">Tarih</th>
-            <th style="width: 10%; text-align:left">P2P Oyun</th>
-            <th style="width: 10%; text-align:left">P2P Kazanılan Puan</th>
-            <th style="width: 10%; text-align:left">P2M Oyun</th>
-            <th style="width: 10%; text-align:left">P2M Kazanılan Puan</th>
-            <th style="width: 10%; text-align:left">Oynayan Kullanıcı</th>
-            <th style="width: 10%; text-align:left">Toplam Oyun</th>
+            <th style="width: 11.1%; text-align:left">Tarih</th>
+            <th style="width: 11.1%; text-align:left">P2P Oyun</th>
+            <th style="width: 11.1%; text-align:left">P2P Kazanılan Puan</th>
+            <th style="width: 11.1%; text-align:left">P2P Maç Sonu Puan</th>
+            <th style="width: 11.1%; text-align:left">P2M Oyun</th>
+            <th style="width: 11.1%; text-align:left">P2M Kazanılan Puan</th>
+            <th style="width: 11.1%; text-align:left">P2M Maç Sonu Puan</th>
+            <th style="width: 11.1%; text-align:left">Oynayan Kullanıcı</th>
+            <th style="width: 11.1%; text-align:left">Toplam Oyun</th>
             </tr>
            ${tableBody}
             </tbody>
@@ -289,33 +300,38 @@ async function matchGeneralReport(reportType, dateFilter) {
         <table style="width: 100%; border-collapse: collapse;">
             <tbody>
              <tr>
-                <td style="width: 20%;"></td>
-                <td style="width: 20%; font-weight: bold;">Oyun Sayısı</td>
-                <td style="width: 20%; font-weight: bold;">Kazanılan Puan</td>
-                <td style="width: 20%; font-weight: bold;">Oynayan Kullanıcı</td>
-                <td style="width: 20%; font-weight: bold;">Toplam Oyun</td>
+                <td style="width: 16.6%;"></td>
+                <td style="width: 16.6%; font-weight: bold;">Oyun Sayısı</td>
+                <td style="width: 16.6%; font-weight: bold;">Kazanılan Puan</td>
+                <td style="width: 16.6%; font-weight: bold;">Maç Sonu Puan</td>
+                <td style="width: 16.6%; font-weight: bold;">Oynayan Kullanıcı</td>
+                <td style="width: 16.6%; font-weight: bold;">Toplam Oyun</td>
             </tr>
              <tr>
-                <td style="width: 20%; font-weight: bold;">P2P</td>
-                <td style="width: 20%;">${numberWithDot(matchData[0].p2p_play)}</td>
-                <td style="width: 20%;">${numberWithDot(matchData[0].p2p_play_points_earned)}</td>
-                <td style="width: 20%;">-</td>
-                <td style="width: 20%;">-</td>
+                <td style="width: 16.6%; font-weight: bold;">P2P</td>
+                <td style="width: 16.6%;">${numberWithDot(matchData[0].p2p_play)}</td>
+                <td style="width: 16.6%;">${numberWithDot(matchData[0].p2p_play_points_earned)}</td>
+                <td style="width: 16.6%;">${numberWithDot(matchData[0].p2p_play_points_earned)}</td>
+                <td style="width: 16.6%;">-</td>
+                <td style="width: 16.6%;">-</td>
             </tr>
              <tr>
-                <td style="width: 20%; font-weight: bold;">P2M</td>
-                <td style="width: 20%;">${numberWithDot(matchData[0].p2m_play)}</td>
-                <td style="width: 20%;">${numberWithDot(matchData[0].p2m_play_points_earned)}</td>
-                <td style="width: 20%;">-</td>
-                <td style="width: 20%;">-</td>
+                <td style="width: 16.6%; font-weight: bold;">P2M</td>
+                <td style="width: 16.6%;">${numberWithDot(matchData[0].p2m_play)}</td>
+                <td style="width: 16.6%;">${numberWithDot(matchData[0].p2m_play_points_earned)}</td>
+                <td style="width: 16.6%;">${numberWithDot(matchData[0].p2m_play_points_earned)}</td>
+                <td style="width: 16.6%;">-</td>
+                <td style="width: 16.6%;">-</td>
             </tr>
             <tr>
-                <td style="width: 20%; font-weight: bold;">Toplam</td>
-                <td style="width: 20%;">${numberWithDot(matchData[0].p2p_play + matchData[0].p2m_play)}</td>
-                <td style="width: 20%;">${numberWithDot(matchData[0].p2p_play_points_earned +
+                <td style="width: 16.6%; font-weight: bold;">Toplam</td>
+                <td style="width: 16.6%;">${numberWithDot(matchData[0].p2p_play + matchData[0].p2m_play)}</td>
+                <td style="width: 16.6%;">${numberWithDot(matchData[0].p2p_play_points_earned +
             matchData[0].p2m_play_points_earned)}</td>
-                <td style="width: 20%;">${numberWithDot(matchData[0].player || 0)}</td>
-                <td style="width: 20%;">${numberWithDot(matchData[0].play || 0)}</td>
+             <td style="width: 20%;">${numberWithDot(matchData[0].p2p_play_points_earned +
+                matchData[0].p2m_play_points_earned)}</td>
+                <td style="width: 16.6%;">${numberWithDot(matchData[0].player || 0)}</td>
+                <td style="width: 16.6%;">${numberWithDot(matchData[0].play || 0)}</td>
             </tr>
             </tbody>
         </table>`;
@@ -341,7 +357,7 @@ async function rewardReport(reportType, dateFilter) {
             console.log("ERROR 47", e);
             return res.status(400).send({ message: e });
         });
-
+    console.log("rewardData before: ", rewardData)
     if (defaultReportType == 1 || defaultReportType == 2) {
         let result = [];
         rewardData.reduce(function (res, value) {
@@ -356,17 +372,21 @@ async function rewardReport(reportType, dateFilter) {
             return res;
         }, {});
         rewardData = result;
+        console.log("rewardData after: ", rewardData)
     }
 
     let rewardBody = "";
-    let total = 0;
+    let chargeTotal = 0;
+    let pointsTotal = 0;
     let lastDate = "";
 
     rewardData.forEach((reward, index) => {
-        total += reward.count;
+        chargeTotal += reward.charge;
+        pointsTotal += reward.points;
     })
     rewardData.forEach((reward, index) => {
         let date = reward.date;
+        console.log("reward: ", reward);
         if (defaultReportType == 1 || defaultReportType == 2) {
             let now = new Date();
             date = now.setDate(now.getDate() - 1);
@@ -378,16 +398,22 @@ async function rewardReport(reportType, dateFilter) {
                     <td style="width: 10%;">---</td>
                     <td style="width: 10%;">---</td>
                     <td style="width: 10%;">---</td>
-                    <td style="width: 70%;">---</td>
+                    <td style="width: 10%;">---</td>
+                    <td style="width: 10%;">---</td>
+                    <td style="width: 50%;">---</td>
                 </tr>`
         }
 
-        let ratio = defaultReportType == 1 ? reward.count == 0 ? 0 : ((reward.count / total) * 100).toFixed(2) : reward.ratio;
+        let ratioCharge = defaultReportType == 1 ? reward.charge == 0 ? 0 : ((reward.charge / chargeTotal) * 100).toFixed(2) : reward.charge_ratio;
+        let ratioPoints = defaultReportType == 1 ? reward.points == 0 ? 0 : ((reward.points / pointsTotal) * 100).toFixed(2) : reward.points_ratio;
+        //reward.charge undefined 
         rewardBody += `<tr>
                     <td style="width: 10%;">${new Date(date).toLocaleDateString()}</td>
-                    <td style="width: 10%;">${numberWithDot(reward.count)}</td>
-                    <td style="width: 10%;">${ratio}</td>
-                    <td style="width: 70%;">${STATUS_CODE[reward.status_code]}</td>
+                    <td style="width: 10%;">${numberWithDot(reward.charge)}</td>
+                    <td style="width: 10%;">${ratioCharge}</td>
+                    <td style="width: 10%;">${numberWithDot(reward.points)}</td>
+                    <td style="width: 10%;">${ratioPoints}</td>
+                    <td style="width: 50%;">${STATUS_CODE[reward.status_code]}</td>
                     </tr>
                     `;
 
@@ -400,22 +426,114 @@ async function rewardReport(reportType, dateFilter) {
             <tbody>
             <tr>
             <th style="width: 10%; text-align:left">Tarih</th>
-            <th style="width: 10%; text-align:left">Adet</th>
-            <th style="width: 10%; text-align:left">Oran</th>
-            <th style="width: 70%; text-align:left">Detay</th>
+            <th style="width: 10%; text-align:left">Adet (Charge)</th>
+            <th style="width: 10%; text-align:left">Oran (Charge)</th>
+            <th style="width: 10%; text-align:left">Adet (Puan)</th>
+            <th style="width: 10%; text-align:left">Oran (Puan)</th>
+            <th style="width: 50%; text-align:left">Detay</th>
             </tr>
             ${rewardBody}
              <tr>
             <th style="width: 10%; text-align:left">Toplam</th>
-            <th style="width: 10%; text-align:left">${numberWithDot(total)}</th>
+            <th style="width: 10%; text-align:left">${numberWithDot(chargeTotal)}</th>
             <th style="width: 10%; text-align:left">-</th>
-            <th style="width: 70%; text-align:left">-</th>
+            <th style="width: 10%; text-align:left">${numberWithDot(pointsTotal)}</th>
+            <th style="width: 10%; text-align:left">-</th>
+            <th style="width: 50%; text-align:left">-</th>
             </tr>
             </tbody>
         </table>`;
 
     return rewardHtml;
 }
+async function revenueReport(reportType, dateFilter) {
+    let defaultReportType;
+    let subscriptionCreated = 0;
+    let refunded = 0;
+    const date = new Date().setDate(new Date().getDate() - 1);
+    //1-2 TOPLAM 11-22 gün bazlı
+
+    if (reportType == 1 || reportType == 11 || reportType == 22 || reportType == 2) {
+        defaultReportType = reportType;
+        reportType = 0;
+    }
+
+    const db = await Api.useDatabase();
+    const subscriptionCollection = db.collection(`bucket_${SUBSCRIPTION_REPORT_BUCKET}`);
+
+    try {
+        const subscriptionData = await subscriptionCollection
+            .find({ report_type: reportType, date: dateFilter })
+            .toArray();
+
+        if (defaultReportType == 1 || defaultReportType == 2) {
+            subscriptionData.forEach(data => {
+                subscriptionCreated += data.subscription_created || 0;
+                refunded += data.refunded || 0;
+
+            });
+            const revenue = (subscriptionCreated - refunded) * CHARGE_VALUE;
+            let tableBody = "";
+            tableBody += `
+                <tr>
+                    <td style="width: 25%;">${new Date(date).toLocaleDateString()}</td>
+                    <td style="width: 25%;">${numberWithDot(subscriptionCreated)}</td>
+                    <td style="width: 25%;">${numberWithDot(refunded)}</td>
+                    <td style="width: 25%;">${CHARGE_VALUE}TL</td>
+                    <td style="width: 25%;">${numberWithDot(revenue)}TL</td>
+                </tr>`;
+
+            let revenueHtml = `
+            <h4>Revenue Report</h4>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tbody>
+                <tr>
+                    <th style="width: 25%; text-align:left">Tarih</th>
+                    <th style="width: 25%; text-align:left">Yeni abone sayısı</th>
+                    <th style="width: 25%; text-align:left">İade edilen abonelik sayısı</th>
+                    <th style="width: 25%; text-align:left">Charge değeri</th>
+                    <th style="width: 25%; text-align:left">Toplam gelir</th>
+                </tr>
+                ${tableBody}
+                </tbody>
+            </table>`;
+            return revenueHtml;
+        } else {
+            let tableBody = "";
+            subscriptionData.forEach(data => {
+                const revenue = (data.subscription_created - data.refunded) * CHARGE_VALUE;
+                tableBody += `
+                <tr>
+                    <td style="width: 25%;">${new Date(data.date).toLocaleDateString()}</td>
+                    <td style="width: 25%;">${numberWithDot(data.subscription_created)}</td>
+                    <td style="width: 25%;">${numberWithDot(data.refunded)}</td>
+                    <td style="width: 25%;">${CHARGE_VALUE}TL</td>
+                    <td style="width: 25%;">${numberWithDot(revenue)}TL</td>
+                </tr>`;
+            });
+            let revenueHtml = `
+                <h4>Revenue Report</h4>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tbody>
+                    <tr>
+                        <th style="width: 25%; text-align:left">Tarih</th>
+                        <th style="width: 25%; text-align:left">Yeni abone sayısı</th>
+                        <th style="width: 25%; text-align:left">İade edilen abonelik sayısı</th>
+                        <th style="width: 25%; text-align:left">Charge değeri</th>
+                        <th style="width: 25%; text-align:left">Toplam gelir</th>
+                    </tr>
+                    ${tableBody}
+                    </tbody>
+                </table>`;
+            return revenueHtml;
+        }
+
+    } catch (e) {
+        console.log("ERROR 99", e);
+        return res.status(400).send({ message: e });
+    }
+}
+
 
 async function subscriptionReport(reportType, dateFilter) {
     let defaultReportType;
@@ -676,5 +794,6 @@ const STATUS_CODE = {
     23: "Kullanılmış Voucher",
     24: "Hediye miktarı sıfır veya sıfırdan küçük verilemez",
     25: "Hediye geçiş tanımlarında hata",
-    26: "Mükerrer işlem numarası (transaction id)"
+    26: "Mükerrer işlem numarası (transaction id)",
+    100: "Başarısız"
 }

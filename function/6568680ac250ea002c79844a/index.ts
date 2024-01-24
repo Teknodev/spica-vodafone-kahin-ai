@@ -16,9 +16,10 @@ const PORT = 2144;
 let lastTxnDate, lastTxnId;
 export async function setReward() {
     if (lastTxnDate && terminal && lastTxnId) {
+        console.log("lastTxnId: ", lastTxnId)
         terminal.stdin.end();
         terminal = undefined;
-        await updateRewardQueueByTxnId();
+        await updateRewardQueueByTxnId(lastTxnId);
         lastTxnDate = undefined;
     }
 

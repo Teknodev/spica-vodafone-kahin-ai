@@ -69,7 +69,7 @@ export async function checkFinishedDuels() {
 
     await db
         .collection(`bucket_${SAYI_KRALI_DUEL_BUCKET}`)
-        .deleteMany({ created_at: { $lt: t2 }, last_food_eat_date: { $exists: false } })
+        .deleteMany({ created_at: { $lt: t2 } })
         .catch(err => console.log("ERROR 10", err));
 }
 

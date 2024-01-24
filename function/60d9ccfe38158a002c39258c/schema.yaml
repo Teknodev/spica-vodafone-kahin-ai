@@ -10,6 +10,12 @@ triggers:
       type: INSERT
     type: bucket
     active: true
+  setSubscriptionStatus:
+    options:
+      timezone: UTC
+      frequency: "*/5 * * * *"
+    type: schedule
+    active: true
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100

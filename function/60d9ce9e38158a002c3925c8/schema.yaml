@@ -2,7 +2,7 @@ _id: 60d9ce9e38158a002c3925c8
 name: Report
 description: Report
 language: javascript
-timeout: 16.8
+timeout: 216.7
 triggers:
   executeReportDaily:
     options:
@@ -26,6 +26,13 @@ triggers:
     options:
       method: Get
       path: /executeReportDailyMan
+      preflight: true
+    type: http
+    active: true
+  executeReportWeeklyMan:
+    options:
+      method: Get
+      path: /executeReportWeeklyMan
       preflight: true
     type: http
     active: true

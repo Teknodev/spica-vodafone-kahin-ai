@@ -48,7 +48,11 @@ export async function serviceListener(req, res) {
     if (!user) {
         await Auth.smsFlowRegister(msisdn)
         user = await User.getByMsisdn(msisdn);
-        console.error("NEW USER: ", msisdn, user)
+    };
+
+    if (!user) {
+        console.error("ERR USER: ", msisdn)
+        return "err"
     };
 
     const handleNotification = {
@@ -69,7 +73,7 @@ export async function serviceListener(req, res) {
 
 async function subscriptionCreated(msisdn, user, body) {
     const subscription = body.params.subscription;
-
+    console.log("@subscriptionCreated: ", msisdn, user, subscription);
     if (user) {
         await User.updateOne({ _id: user._id }, {
             $set: {
@@ -78,9 +82,9 @@ async function subscriptionCreated(msisdn, user, body) {
                 range_point: 0,
                 range_reward_count: 0,
                 subscription_status: 'active',
-                subscription_start_date: new Date(subscription.startDate),
-                subscription_next_renewal_date: new Date(subscription.nextRenewalDate),
-                subscription_last_renewal_date: new Date(subscription.lastRenewalDate),
+                subscription_start_date: formatDate(subscription.startDate),
+                subscription_next_renewal_date: formatDate(subscription.nextRenewalDate),
+                subscription_last_renewal_date: formatDate(subscription.lastRenewalDate),
             }
         })
     }
@@ -115,8 +119,8 @@ async function subscriptionResumed(msisdn, user, body) {
                 // range_award: 0,
                 // range_reward_count: 0,
                 subscription_status: 'active',
-                subscription_next_renewal_date: new Date(subscription.nextRenewalDate),
-                subscription_last_renewal_date: new Date(subscription.lastRenewalDate),
+                subscription_next_renewal_date: formatDate(subscription.nextRenewalDate),
+                subscription_last_renewal_date: formatDate(subscription.lastRenewalDate),
             }
         })
     }
@@ -136,8 +140,8 @@ async function subscriptionRenewed(msisdn, user, body) {
                 range_point: 0,
                 range_reward_count: 0,
                 subscription_status: 'active',
-                subscription_next_renewal_date: new Date(subscription.nextRenewalDate),
-                subscription_last_renewal_date: new Date(subscription.lastRenewalDate),
+                subscription_next_renewal_date: formatDate(subscription.nextRenewalDate),
+                subscription_last_renewal_date: formatDate(subscription.lastRenewalDate),
             }
         })
     }
@@ -213,4 +217,35 @@ function insertNotificationLog(body, msisdn) {
         created_at: new Date(),
         body: JSON.stringify(body)
     })
+}
+
+function formatDate(inputDateString) {
+    // const date = new Date(inputDateString);
+
+    // if (!isNaN(date.getTime())) {
+    //     return date;
+    // }
+
+    const [day, month, yearTime] = inputDateString.split("/");
+    const [year, time] = yearTime.split(" ");
+    const [hour, minute, second] = time.split(":");
+    const milliseconds = Number(second.split(".")[1]);
+
+    const formattedDate = new Date(Date.UTC(year, month - 1, day, hour, minute, second, milliseconds));
+
+    formattedDate.setUTCHours(formattedDate.getUTCHours() - 6);
+
+    const options = {
+        timeZone: 'Europe/Istanbul',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        fractionalSecondDigits: 3,
+    };
+    const formatter = new Intl.DateTimeFormat('en-US', options);
+
+    return new Date(formatter.format(formattedDate));
 }

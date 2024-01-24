@@ -2,7 +2,7 @@ _id: 615191c237f1b4002ddcc260
 title: Reward Report
 description: Describe your new bucket
 icon: receipt
-primary: count
+primary: report_type
 readOnly: false
 history: false
 properties:
@@ -13,13 +13,6 @@ properties:
     options:
       position: bottom
     default: :created_at
-  count:
-    type: number
-    title: count
-    description: Description of the count input
-    options:
-      position: bottom
-    default: 0
   report_type:
     type: number
     title: report_type
@@ -27,12 +20,6 @@ properties:
     options:
       position: bottom
     default: 0
-  ratio:
-    type: number
-    title: ratio
-    description: Description of the ratio input
-    options:
-      position: bottom
   status_code:
     type: number
     title: status_code
@@ -52,6 +39,20 @@ properties:
     description: Description of the points input
     options:
       position: bottom
+  charge_ratio:
+    type: number
+    title: charge_ratio
+    description: Description of the charge_ratio input
+    options:
+      position: bottom
+    default: 0
+  points_ratio:
+    type: number
+    title: points_ratio
+    description: Description of the points_ratio input
+    options:
+      position: bottom
+    default: 0
 acl:
   write: true==true
   read: true==true

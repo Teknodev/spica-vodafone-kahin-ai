@@ -37,6 +37,76 @@ triggers:
       preflight: true
     type: http
     active: false
+  testDateFormat:
+    options:
+      method: Get
+      path: /testDateFormat
+      preflight: true
+    type: http
+    active: true
+  getNonRewardedUsers:
+    options:
+      method: Get
+      path: /getNonRewardedUsers
+      preflight: true
+    type: http
+    active: true
+  userIdentity:
+    options:
+      method: Get
+      path: /userIdentity
+      preflight: true
+    type: http
+    active: false
+  updatedate:
+    options:
+      method: Get
+      path: /testUpdateBatu
+      preflight: true
+    type: http
+    active: false
+  getSubscriptionNone:
+    options:
+      method: Get
+      path: /getSubscriptionNone
+      preflight: true
+    type: http
+    active: false
+  getSubscriptionMsisdn:
+    options:
+      method: Get
+      path: /getSubscriptionMsisdn
+      preflight: true
+    type: http
+    active: false
+  notificationsMatch:
+    options:
+      method: Get
+      path: /notificationsMatch
+      preflight: true
+    type: http
+    active: false
+  defineStatus:
+    options:
+      method: Get
+      path: /defineStatus
+      preflight: true
+    type: http
+    active: false
+  patchUserStatus:
+    options:
+      method: Get
+      path: /patchUserStatus
+      preflight: true
+    type: http
+    active: false
+  revision:
+    options:
+      method: Get
+      path: /revision
+      preflight: true
+    type: http
+    active: true
 env:
   NO_DEVKIT_DATABASE_WARNING: "{NO_DEVKIT_DATABASE_WARNING}"
 memoryLimit: 100

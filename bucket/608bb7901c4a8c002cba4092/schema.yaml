@@ -58,6 +58,20 @@ properties:
     options:
       position: bottom
     default: 0
+  p2p_play_points:
+    type: number
+    title: p2p_play_points
+    description: Description of the p2p_play_points input
+    options:
+      position: bottom
+    default: 0
+  p2m_play_points:
+    type: number
+    title: p2m_play_points
+    description: Description of the p2m_play_points input
+    options:
+      position: bottom
+    default: 0
 acl:
   write: true==true
   read: true==true

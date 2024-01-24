@@ -47,9 +47,9 @@ export async function matchmaker() {
             .toArray()
             .catch(err => console.log("ERROR 1", err));
 
-        if (match_making_users.length) {
-            console.log("@match_making_users: ", match_making_users)
-        }
+        // if (match_making_users.length) {
+        //     console.log("@match_making_users: ", match_making_users)
+        // }
 
         let { matched_with_user, matched_with_bots } = seperateMatchingsUsers([
             ...match_making_users

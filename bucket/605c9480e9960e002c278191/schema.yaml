@@ -123,7 +123,6 @@ properties:
       - suspended
       - inactive
       - deactivated
-    default: inactive
   subscription_start_date:
     type: date
     title: subscription_start_date
@@ -154,7 +153,7 @@ properties:
     description: Description of the range_reward_count input
     options:
       position: bottom
-    default: -2
+    default: 0
   op_note:
     type: array
     title: op_note

@@ -86,7 +86,9 @@ async function matchReport(reportType, dateFrom, dateTo) {
     }
 
     let p2pMatchPointsEarned = 0,
-        p2mMatchPointsEarned = 0;
+        p2mMatchPointsEarned = 0,
+        p2pPoints = 0,
+        p2mPoints = 0;
 
     const matches = await Api.getMany(PAST_MATCH_BUCKET, endTimeFilter)
 
@@ -95,10 +97,22 @@ async function matchReport(reportType, dateFrom, dateTo) {
 
     p2pMatches.forEach(match => {
         p2pMatchPointsEarned += match.points_earned;
+
+        if (match.winner == 3) {
+            p2pPoints += 200;
+        } else {
+            p2pPoints += 150;
+        }
+
     });
 
     p2mMatches.forEach(match => {
         p2mMatchPointsEarned += match.points_earned;
+        if (match.winner == 3) {
+            p2mPoints += 200;
+        } else {
+            p2mPoints += 100;
+        }
     });
 
     const playedMatch = await playedMatchCount(endTimeFilter);
@@ -107,8 +121,10 @@ async function matchReport(reportType, dateFrom, dateTo) {
         date: new Date(reportDate),
         p2p_play: p2pMatches.length,
         p2p_play_points_earned: p2pMatchPointsEarned,
+        p2p_play_points: p2pPoints,
         p2m_play: p2mMatches.length,
         p2m_play_points_earned: p2mMatchPointsEarned,
+        p2m_play_points: p2mPoints,
         report_type: reportType,
         player: playedMatch.player,
         play: playedMatch.play
@@ -174,41 +190,51 @@ async function getRewards(reportType, dateFrom, dateTo) {
     const db = await Api.useDatabase();
     const rewardLogsCollection = db.collection(`bucket_${REWARD_LOG_BUCKET}`);
 
-    let rewardsData = await rewardLogsCollection
-        .aggregate([
-            {
-                $match: {
-                    date: {
-                        $gte: dateFrom,
-                        $lt: dateTo
-                    }
-                }
-            },
-            { $group: { _id: "$status_code", count: { $sum: 1 } } }
-        ])
-        .toArray();
+    const rewardsData = await rewardLogsCollection.find({
+        date: {
+            $gte: dateFrom,
+            $lt: dateTo
+        }
+    }).toArray();
 
-    let totalReward = 0;
-    for (let reward of rewardsData) {
-        totalReward += reward.count;
-    }
+    const result = {};
+
+    rewardsData.forEach(transaction => {
+        const { status_code, purpose } = transaction;
+        if (!result[status_code]) {
+            result[status_code] = {
+                statusCode: status_code,
+                purposeCharge: 0,
+                purposePoints: 0,
+            };
+        }
+
+        result[status_code][`purpose${purpose === 'charge' ? 'Charge' : 'Points'}`]++;
+
+        const totalCount = result[status_code].purposeCharge + result[status_code].purposePoints;
+        result[status_code][`purpose${purpose === 'charge' ? 'Charge' : 'Points'}Rate`] =
+            totalCount === 0 ? 0 : formatNumber((result[status_code][`purpose${purpose === 'charge' ? 'Charge' : 'Points'}`] / rewardsData.length) * 100);
+    });
+
+    const output = Object.values(result);
 
     const promises = [];
-    for (let reward of rewardsData) {
+    for (let reward of output) {
+        let statusCode = reward.statusCode !== undefined ? reward.statusCode : 100;
         let data = {
             date: new Date(reportDate),
-            count: reward.count,
-            ratio: reward.count ? Number(((reward.count / totalReward) * 100).toFixed(2)) : 0,
-            status_code: reward._id,
+            status_code: statusCode,
+            charge: reward.purposeCharge || 0,
+            charge_ratio: reward.purposeChargeRate || 0,
+            points: reward.purposePoints || 0,
+            points_ratio: reward.purposePointsRate || 0,
             report_type: reportType
         }
 
-        if (reward._id != null) {
-            promises.push(Api.insertOne(REWARD_REPORT_BUCKET, data))
-        }
+        promises.push(Api.insertOne(REWARD_REPORT_BUCKET, data))
     }
 
-    await Promise.all(promises);
+    await Promise.all(promises).catch(console.error);
     return true
 }
 
@@ -321,8 +347,8 @@ async function reportExportSend(title, reportType) {
             emails: [
                 "serdar@polyhagency.com",
                 "caglar@polyhagency.com",
-                "ozangol@teknodev.biz",
                 "idriskaribov@gmail.com",
+                "ozangol@teknodev.biz",
             ],
             report_type: reportType
         })
@@ -346,7 +372,7 @@ export async function executeReportDailyMan(req, res) {
 
     // await reportExportSend("Günlük Rapor", 0).catch(err => console.log("ERROR: 5", err));
 
-    let date = new Date()
+    let date = new Date().setDate(new Date().getDate() - 1)
     let dateFrom = new Date(date).setHours(0, 0, 0);
     let dateTo = new Date(date).setHours(23, 59, 59);
 
@@ -361,4 +387,15 @@ export async function executeReportDailyMan(req, res) {
     await reportExportSend("Günlük Rapor", 0).catch(err => console.log("ERROR: 5", err));
 
     return res.status(200).send({ message: 'Ok' });
+}
+export async function executeReportWeeklyMan(req,res) {
+    await reportExportSend("Haftalık Toplam Rapor", 1).catch(err => console.log("ERROR: 63", err));
+    await reportExportSend("Haftalık Gün Bazlı Rapor", 11).catch(err =>console.log("ERROR: 63", err));
+
+    return res.status(200).send('ok');
+}
+
+function formatNumber(number) {
+    if (Number.isInteger(number)) return number;
+    return Number(number.toFixed(2));
 }

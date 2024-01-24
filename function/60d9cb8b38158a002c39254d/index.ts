@@ -179,7 +179,7 @@ export async function smsFlowRegister(msisdn) {
     const Identity = Api.useIdentity();
     let [identityData] = await Identity.getAll({ filter: { identifier } });
     if (identityData) {
-        return res.status(400).send({ status_code: 4 });
+        return;
     }
 
     let password = codeGenerate(6);
@@ -192,7 +192,7 @@ export async function smsFlowRegister(msisdn) {
     }).catch(console.error)
 
     if (!identityData) {
-        return res.status(400).send({ status_code: 1 });
+        return;
     }
 
     Sms.sendPassword(msisdn, password);
